@@ -1,0 +1,15 @@
+{
+	"name": "@temples/docs",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Documentation site for the Temples packages, built with Temples itself.",
+	"scripts": {
+		"build": "bun run src/build.ts",
+		"serve": "bun run src/serve.ts"
+	},
+	"dependencies": {
+		"@temples/engine": "workspace:*",
+		"@temples/ssr": "workspace:*"
+	}
+}

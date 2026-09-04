@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title data-bind="page.title">Temples documentation</title>
+	<meta name="description" data-bind="content=page.description" content="Declarative HTML templates." />
+	<link rel="stylesheet" href="assets/style.css" />
+	<link rel="icon" href="data:," />
+</head>
+<body>
+	<div class="site">
+		<header class="site-header">
+			<a class="brand" href="index.html">Temples</a>
+			<span class="tagline">templ<em>at</em>es that you won't hate</span>
+		</header>
+		<div class="site-body">
+			<nav class="sidebar" aria-label="Pages">
+				<ul data-iterate="nav: site.pages">
+					<li><a href="index.html" data-bind="text=nav.title, href=nav.url">Page</a></li>
+				</ul>
+			</nav>
+			<main class="content" data-bind="html=page.content"></main>
+		</div>
+		<footer class="site-footer">
+			<p>Built with Temples — <a href="https://github.com/zipang/Temples">source on GitHub</a>.</p>
+		</footer>
+	</div>
+</body>
+</html>

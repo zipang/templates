@@ -1,0 +1,173 @@
+:root {
+	--text: #1f2933;
+	--muted: #616e7c;
+	--accent: #b3541e;
+	--border: #e4e7eb;
+	--bg-soft: #f8f9fa;
+	--code-bg: #f0f2f5;
+	--code-text: #d63384;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	color: var(--text);
+	line-height: 1.65;
+}
+
+.site {
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.site-header {
+	display: flex;
+	align-items: baseline;
+	gap: 1rem;
+	padding: 1rem 1.5rem;
+	border-bottom: 1px solid var(--border);
+}
+
+.brand {
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.tagline {
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.site-body {
+	flex: 1;
+	display: flex;
+	gap: 2.5rem;
+	max-width: 75rem;
+	width: 100%;
+	margin: 0 auto;
+	padding: 1.5rem;
+}
+
+.sidebar {
+	width: 14rem;
+	flex-shrink: 0;
+}
+
+.sidebar ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	border-right: 1px solid var(--border);
+}
+
+.sidebar a {
+	display: block;
+	padding: 0.4rem 0.75rem;
+	color: var(--text);
+	text-decoration: none;
+	border-radius: 4px;
+}
+
+.sidebar a:hover {
+	background: var(--bg-soft);
+	color: var(--accent);
+}
+
+.content {
+	flex: 1;
+	min-width: 0;
+	max-width: 46rem;
+}
+
+.content h1 {
+	border-bottom: 1px solid var(--border);
+	padding-bottom: 0.4rem;
+}
+
+.content h2,
+.content h3 {
+	margin-top: 2rem;
+}
+
+.content a {
+	color: var(--accent);
+}
+
+.content code {
+	background: var(--code-bg);
+	color: var(--code-text);
+	padding: 0.15em 0.4em;
+	border-radius: 4px;
+	font-size: 0.9em;
+}
+
+.content pre {
+	background: var(--bg-soft);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	padding: 1rem;
+	overflow-x: auto;
+	line-height: 1.5;
+}
+
+.content pre code {
+	background: none;
+	color: inherit;
+	padding: 0;
+	font-size: 0.875em;
+}
+
+.content blockquote {
+	margin: 0;
+	padding: 0.5rem 1rem;
+	border-left: 3px solid var(--accent);
+	color: var(--muted);
+	background: var(--bg-soft);
+}
+
+.content table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.content th,
+.content td {
+	border: 1px solid var(--border);
+	padding: 0.45rem 0.75rem;
+	text-align: left;
+}
+
+.content th {
+	background: var(--bg-soft);
+}
+
+.site-footer {
+	padding: 1rem 1.5rem;
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+
+@media (max-width: 50rem) {
+	.site-body {
+		flex-direction: column;
+	}
+
+	.sidebar {
+		width: 100%;
+	}
+
+	.sidebar ul {
+		border-right: none;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+	}
+}
