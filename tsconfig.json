@@ -14,13 +14,16 @@
 		"verbatimModuleSyntax": true,
 		"noEmit": true,
 
-		// Local aliases for the package subpaths consumed by the example.
-		// Point at the declaration files so type checking resolves the real API.
+		// Local aliases for the workspace packages, pointing at their sources so
+		// type checking and the Bun dev flow work without a prior build.
+		// Package builds override these with `paths: {}` to resolve the real
+		// declaration files through node_modules.
 		"paths": {
-			"@temples/components": ["./dist/component.d.ts"],
-			"@temples/engine": ["./dist/engine.d.ts"],
-			"@temples/ssr": ["./dist/ssr.d.ts"],
-			"@temples/jquery": ["./dist/jquery.d.ts"]
+			"@temples/components": ["./packages/components/src/component.ts"],
+			"@temples/components/reactive": ["./packages/components/src/reactive.ts"],
+			"@temples/engine": ["./packages/engine/src/engine.ts"],
+			"@temples/ssr": ["./packages/ssr/src/ssr.ts"],
+			"@temples/jquery": ["./packages/jquery/src/jquery.ts"]
 		},
 
 		// Best practices
@@ -35,5 +38,5 @@
 		"noUnusedParameters": false,
 		"noPropertyAccessFromIndexSignature": false
 	},
-	"exclude": ["dist", "dist/**"]
+	"exclude": ["**/dist/**"]
 }

@@ -1,0 +1,46 @@
+{
+	"name": "@temples/jquery",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "jQuery plugin for the Temples template engine: $.fn.temples(data).",
+	"license": "MIT",
+	"homepage": "https://zipang.github.io/Temples/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zipang/Temples.git",
+		"directory": "packages/jquery"
+	},
+	"bugs": {
+		"url": "https://github.com/zipang/Temples/issues"
+	},
+	"keywords": [
+		"jquery",
+		"jquery-plugin",
+		"html",
+		"template",
+		"templating"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/jquery.d.ts",
+			"default": "./dist/jquery.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"sideEffects": true,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "bun build src/jquery.ts --outdir dist --format esm --target browser --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --entry-naming \"[name].[ext]\" && bun build src/jquery.ts --outdir dist --format esm --target browser --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --minify --entry-naming \"[name].min.[ext]\" && tsc -p tsconfig.build.json"
+	},
+	"dependencies": {
+		"@temples/engine": "workspace:*"
+	},
+	"peerDependencies": {
+		"jquery": ">=3.0.0"
+	}
+}

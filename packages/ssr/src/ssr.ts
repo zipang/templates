@@ -1,6 +1,6 @@
+import type { TemplesComponent } from "@temples/components";
+import type { TemplesData } from "@temples/engine";
 import { parseHTML } from "linkedom";
-import type { TemplesComponent } from "./component";
-import type { TemplesData } from "./engine";
 import { extractDomGlobals, installGlobals, restoreGlobals } from "./utilities/dom-globals";
 
 /**
@@ -88,12 +88,12 @@ export const prepare: PrepareFunction = (
 		const previous = installGlobals(extractDomGlobals(dom));
 
 		try {
-			const { Renderer } = await import("./engine");
+			const { Renderer } = await import("@temples/engine");
 
 			let componentClass: typeof TemplesComponent | undefined;
 
 			if (templesComponents.length > 0) {
-				({ TemplesComponent: componentClass } = await import("./component"));
+				({ TemplesComponent: componentClass } = await import("@temples/components"));
 
 				for (const tc of templesComponents) {
 					// linkedom allows a given class to be defined only once, in

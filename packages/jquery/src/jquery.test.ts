@@ -1,7 +1,6 @@
 import { afterAll, describe, expect, test } from "bun:test";
+import { Renderer } from "@temples/engine";
 import jQuery from "jquery";
-
-import { Renderer } from "./engine";
 
 const originalDollar = (globalThis as Record<string, unknown>).$;
 const originalJQuery = (globalThis as Record<string, unknown>).jQuery;

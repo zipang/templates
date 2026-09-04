@@ -1,5 +1,5 @@
 import { parseHTML } from "linkedom";
-import { extractDomGlobals, installGlobals } from "../src/utilities/dom-globals";
+import { extractDomGlobals, installGlobals } from "../packages/ssr/src/utilities/dom-globals";
 
 const dom = parseHTML("<!doctype html><html><head></head><body></body></html>");
 

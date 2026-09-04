@@ -1,0 +1,48 @@
+{
+	"name": "@temples/components",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Declarative Web Components built on the Temples template engine, with reactive state.",
+	"license": "MIT",
+	"homepage": "https://zipang.github.io/Temples/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zipang/Temples.git",
+		"directory": "packages/components"
+	},
+	"bugs": {
+		"url": "https://github.com/zipang/Temples/issues"
+	},
+	"keywords": [
+		"web-components",
+		"custom-elements",
+		"reactive",
+		"html",
+		"templating",
+		"declarative"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/component.d.ts",
+			"default": "./dist/component.js"
+		},
+		"./reactive": {
+			"types": "./dist/reactive.d.ts",
+			"default": "./dist/reactive.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "bun build src/component.ts src/reactive.ts --outdir dist --format esm --target browser --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --entry-naming \"[name].[ext]\" && bun build src/component.ts src/reactive.ts --outdir dist --format esm --target browser --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --minify --entry-naming \"[name].min.[ext]\" && tsc -p tsconfig.build.json"
+	},
+	"dependencies": {
+		"@temples/engine": "workspace:*"
+	}
+}

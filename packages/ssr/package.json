@@ -1,0 +1,46 @@
+{
+	"name": "@temples/ssr",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Server-side rendering and static site generation for the Temples template engine, wired to linkedom.",
+	"license": "MIT",
+	"homepage": "https://zipang.github.io/Temples/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zipang/Temples.git",
+		"directory": "packages/ssr"
+	},
+	"bugs": {
+		"url": "https://github.com/zipang/Temples/issues"
+	},
+	"keywords": [
+		"ssr",
+		"ssg",
+		"linkedom",
+		"html",
+		"template",
+		"server-side"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/ssr.d.ts",
+			"default": "./dist/ssr.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"sideEffects": true,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "bun build src/ssr.ts --outdir dist --format esm --target browser --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --external @temples/components --entry-naming \"[name].[ext]\" && bun build src/ssr.ts --outdir dist --format esm --target browser --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --external @temples/components --minify --entry-naming \"[name].min.[ext]\" && bun build src/ssr.ts --outdir dist --format esm --target node --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --external @temples/components --entry-naming \"[name].[ext]\" && bun build src/ssr.ts --outdir dist --format esm --target node --packages external --tsconfig-override tsconfig.build.json --external @temples/engine --external @temples/components --minify --entry-naming \"[name].min.[ext]\" && tsc -p tsconfig.build.json"
+	},
+	"dependencies": {
+		"@temples/components": "workspace:*",
+		"@temples/engine": "workspace:*",
+		"linkedom": "^0.18.13"
+	}
+}

@@ -6,11 +6,11 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!node_modules", "!.opencode/node_modules", "!out", "!assets"]
+		"includes": ["**", "!node_modules", "!.opencode", "!out", "!assets"]
 	},
 	"overrides": [
 		{
-			"includes": ["dist/**"],
+			"includes": ["**/dist/**"],
 			"linter": {
 				"enabled": false
 			},
@@ -19,7 +19,7 @@
 			}
 		},
 		{
-			"includes": ["dist/**/*.min.js"],
+			"includes": ["**/dist/**/*.min.js"],
 			"formatter": {
 				"enabled": false
 			}

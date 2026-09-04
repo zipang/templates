@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { TemplesComponent } from "./component";
-import { reactive } from "./reactive";
+import { TemplesComponent } from "@temples/components";
+import { reactive } from "@temples/components/reactive";
 import { prepare } from "./ssr";
 
 describe("prepare", () => {

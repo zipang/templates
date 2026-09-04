@@ -1,0 +1,41 @@
+{
+	"name": "@temples/engine",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Declarative DOM-based HTML template engine: data-bind attributes, partial real-time updates, no framework.",
+	"license": "MIT",
+	"homepage": "https://zipang.github.io/Temples/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/zipang/Temples.git",
+		"directory": "packages/engine"
+	},
+	"bugs": {
+		"url": "https://github.com/zipang/Temples/issues"
+	},
+	"keywords": [
+		"html",
+		"template",
+		"templating",
+		"dom",
+		"declarative",
+		"data-binding"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/engine.d.ts",
+			"default": "./dist/engine.js"
+		}
+	},
+	"files": [
+		"dist",
+		"README.md"
+	],
+	"sideEffects": false,
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "bun build src/engine.ts --outdir dist --format esm --target browser --packages external --entry-naming \"[name].[ext]\" && bun build src/engine.ts --outdir dist --format esm --target browser --packages external --minify --entry-naming \"[name].min.[ext]\" && tsc -p tsconfig.build.json"
+	}
+}

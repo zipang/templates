@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		// Declaration emit resolves @temples/* through node_modules (the real
+		// published surface), not through the root source aliases.
+		"paths": {},
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"noEmit": false,
+		"outDir": "dist",
+		"rootDir": "src"
+	},
+	"include": ["src"],
+	"exclude": ["src/**/*.test.ts", "**/dist/**"]
+}

@@ -1,4 +1,4 @@
-import { Renderer, type TemplesData } from "./engine";
+import { Renderer, type TemplesData } from "@temples/engine";
 
 /**
  * Augment the jQuery object so `.temples()` is typed on every collection.

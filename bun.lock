@@ -10,9 +10,45 @@
         "@types/jquery": "^4.0.1",
         "jquery": "^4.0.0",
         "linkedom": "^0.18.13",
+        "typescript": "^5.9.3",
+      },
+    },
+    "packages/components": {
+      "name": "@temples/components",
+      "version": "1.0.0",
+      "dependencies": {
+        "@temples/engine": "workspace:*",
+      },
+    },
+    "packages/docs": {
+      "name": "@temples/docs",
+      "version": "1.0.0",
+      "dependencies": {
+        "@temples/engine": "workspace:*",
+        "@temples/ssr": "workspace:*",
+      },
+    },
+    "packages/engine": {
+      "name": "@temples/engine",
+      "version": "1.0.0",
+    },
+    "packages/jquery": {
+      "name": "@temples/jquery",
+      "version": "1.0.0",
+      "dependencies": {
+        "@temples/engine": "workspace:*",
       },
       "peerDependencies": {
-        "typescript": "^5.9.3",
+        "jquery": ">=3.0.0",
+      },
+    },
+    "packages/ssr": {
+      "name": "@temples/ssr",
+      "version": "1.0.0",
+      "dependencies": {
+        "@temples/components": "workspace:*",
+        "@temples/engine": "workspace:*",
+        "linkedom": "^0.18.13",
       },
     },
   },
@@ -34,6 +70,16 @@
     "@biomejs/cli-win32-arm64": ["@biomejs/cli-win32-arm64@2.5.9", "", { "os": "win32", "cpu": "arm64" }, "sha512-nHK+/HHC+D0ogAHUxomgoSTdjImb6fmNNVTKmf0tyu4eDL1DqPKIHc+i+UL8+b0RnAu8224qo8F2tCVnaT0A3w=="],
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.5.9", "", { "os": "win32", "cpu": "x64" }, "sha512-Yiq0H56LjXSSw/hd9YkXgSLQfzyDJzbzU2TezozxyNw+uKWAqOtqGVvBfzKRRDiaFF5avGAhHdWKx7LtDOShUw=="],
+
+    "@temples/components": ["@temples/components@workspace:packages/components"],
+
+    "@temples/docs": ["@temples/docs@workspace:packages/docs"],
+
+    "@temples/engine": ["@temples/engine@workspace:packages/engine"],
+
+    "@temples/jquery": ["@temples/jquery@workspace:packages/jquery"],
+
+    "@temples/ssr": ["@temples/ssr@workspace:packages/ssr"],
 
     "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
 

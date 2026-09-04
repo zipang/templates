@@ -1,14 +1,13 @@
 {
 	"compilerOptions": {
-		// Resolve the local @temples/* subpaths to the built JavaScript at
-		// runtime. This config is read by Bun when bundling the example; type
-		// checking uses the root tsconfig, which maps the same subpaths to the
-		// declaration files.
+		// Resolve the workspace package sources at runtime and for the editor,
+		// so the example runs with `bun run dev` without a prior build.
 		"paths": {
-			"@temples/components": ["../dist/component.js"],
-			"@temples/engine": ["../dist/engine.js"],
-			"@temples/ssr": ["../dist/ssr.js"],
-			"@temples/jquery": ["../dist/jquery.js"]
+			"@temples/components": ["../packages/components/src/component.ts"],
+			"@temples/components/reactive": ["../packages/components/src/reactive.ts"],
+			"@temples/engine": ["../packages/engine/src/engine.ts"],
+			"@temples/ssr": ["../packages/ssr/src/ssr.ts"],
+			"@temples/jquery": ["../packages/jquery/src/jquery.ts"]
 		}
 	}
 }
