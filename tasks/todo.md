@@ -1,164 +1,79 @@
-# Task List: Temples 1.0
+# Task List: `@temples/*` npm publication + docs site
 
-Tasks are ordered by dependency. Each task is completable in a single focused session.
-Follow `test-driven-development`: failing test first, then implementation.
+Spec: `tasks/spec-npm-docs.md`. Plan: `tasks/plan.md`.
+Tasks are ordered by dependency. Follow `test-driven-development` for any new logic.
 
 ---
 
-## Phase 1: Foundation
+## Phase 1: Workspace restructure (no behavior change)
 
-- [x] **T1: Project tooling setup**
-  - Acceptance: `package.json` has working `dev`, `test`, `typecheck`, `demo` scripts. The `exports` map lists `./engine`, `./ssr`, and `./jquery` entry points (files may be empty stubs). `bun test` runs (even with 0 tests). `bun run typecheck` passes with no errors.
-  - Verify: `bun test` and `bun run typecheck` both exit 0.
-  - Files: `package.json`, `tsconfig.json` (if adjustments needed)
+- [x] **T1: Monorepo skeleton + source moves**
+  - Acceptance: `packages/engine`, `packages/components`, `packages/ssr`, `packages/jquery` exist,
+    each with its `package.json` (`@temples/<name>`, exports map, `files`), sources, and colocated
+    tests. Root `package.json` declares `workspaces: ["packages/*"]` and stays private/unpublished.
+    Inter-package imports use `@temples/engine`; root `test/setup.ts` points at the new dom-globals
+    location; example imports and tsconfig paths use the scoped names. Old `src/` files are gone.
+  - Verify: `bun install && bun test && bun run check && bun run typecheck` all green; `bun run dev` still serves the example.
+  - Files: root `package.json`, `tsconfig.json`, `bunfig.toml` (if needed), `biome.jsonc`, `packages/*/package.json`, `packages/*/src/**`, `example/`, `test/setup.ts`
 
-## Phase 2: Core Engine
+## Phase 2: Build
 
-- [x] **T2: Renderer skeleton + template sources + basic data-bind**
-  - Acceptance: `new Renderer(source)` accepts a DOM element or an HTML string. The string form is parsed once into a container. `render(data)` walks `data-bind` elements and sets text content for bare paths (shorthand) and innerHTML for `html=`. Shorthand defaults to text for non-input elements; the input→value shorthand arrives in T3 with `value=`. There is no `#id` selector form (deprecated with the `Temples` registry).
-  - Verify: Unit test prepares the same template from an HTML string and from a DOM element, renders both with `{ title: "Hello", content: "<b>World</b>" }`, and asserts identical text and innerHTML.
-  - Files: `src/engine.ts`, `src/engine.test.ts`
+- [x] **T2: Per-package build scripts + root orchestration**
+  - Acceptance: each package builds to `dist/` (browser ESM + minified; Node ESM for ssr) plus
+    `.d.ts` via `tsconfig.build.json`, with `@temples/engine`, `linkedom`, `jquery` kept external.
+    Root `build` runs packages in dependency order (engine first).
+  - Verify: `bun run build` succeeds; each `dist/` holds the expected js/min/d.ts files; a dist file's imports of `@temples/engine` remain bare (not bundled).
+  - Files: `packages/*/package.json`, `packages/*/tsconfig*.json`, root `package.json`
 
-- [x] **T3: data-bind typed bindings + multiple + class[a|b|c]**
-  - Acceptance: `value=`, `text=`, `<attr>=` typed bindings work. Multiple bindings separated by commas work together. `class[article|quote|tweet]=article.type` toggles the matched class value and preserves other classes.
-  - Verify: Unit test with `<img data-bind="src=user.avatar, title=user.name">`, `<input data-bind="value=user.name">`, and the class-toggle div — asserts attributes, value, and class list against mock data. Test a second data set for the class toggle.
-  - Files: `src/engine.ts`, `src/engine.test.ts`
+## Phase 3: Publish metadata
 
-- [x] **T4: data-iterate + data-render-if**
-  - Acceptance: `data-iterate="quote: article.quotes"` clones the first child per item, binding `quote`. Auto-naming drops trailing `s` (`article.tags` → `tag`). `data-each` and `from` variants work. `data-render-if` shows/hides based on a truthy condition; function values are called.
-  - Verify: Unit test with a 3-item array asserts 3 cloned children with correct bound values, for all syntax variants. Two `data-render-if` elements, one truthy, one falsy.
-  - Files: `src/engine.ts`, `src/engine.test.ts`
-  - Notes: Done in three slices. Slice 1 = iterate machinery + `name: path` + auto-naming. Slice 2 = `from` keyword + `data-each` synonym. Slice 3 = `data-render-if` (truthy/falsy, function conditions, re-render flip, combination with `data-bind`). Combining `data-render-if` with `data-iterate` on one element is not implemented (v0 supports it; deferred).
+- [x] **T3: package.json metadata + READMEs**
+  - Acceptance: every package has `publishConfig.access: "public"`, version 1.0.0, description,
+    license, repository, keywords, `files: ["dist", "README.md"]`. `linkedom` is a runtime
+    dependency of ssr; `jquery` a peerDependency of jquery; the stray `typescript` peerDependency
+    is dropped. Each package has a README documenting the current reactive API with `@temples/*`
+    imports; the root README becomes a monorepo overview. No mention of the removed
+    `this.data`/`update()` public API anywhere.
+  - Verify: `bun publish --dry-run` succeeds for all four packages with the expected file list.
+  - Files: `packages/*/package.json`, `packages/*/README.md`, `README.md`
 
-- [x] **T5: render only the paths present in the data (unified full/partial render)**
-  - Acceptance: `render(data)` resolves every dotted path present in `data` and applies only the operations bound to that exact path; absent paths keep their current state. A partial dictionary re-renders only the paths it carries. `update(path, value)` re-renders only the binding for that exact path (e.g. `"article.title"`), replacing the flat dotted-path delta. An internal path → operation map gives O(1) lookup. Iterate seeds and render-if conditions participate through the same map.
-  - Verify: Unit test renders two bindings then a single-path update, asserting only that element changes. Tests cover untouched absent paths, explicit empty-value clearing, iterate re-stamp, and render-if re-evaluation.
-  - Files: `src/engine.ts`, `src/engine.test.ts`, `README.md`
+## Phase 4: Docs workspace (dogfood)
 
-- [x] **T6: Renderer toHtml()/renderToString() serialization**
-  - Acceptance: `Renderer#toHtml()` returns the serialized HTML of the rendered root. `renderToString()` is a synonym for `toHtml()`. There is no `Temples` registry and no `destroy()` (the v0 name-based registry is deprecated and removed).
-  - Verify: Unit test renders a template from an HTML string and a DOM element, and asserts the serialized output matches expected markup.
-  - Files: `src/engine.ts`, `src/engine.test.ts`
+- [x] **T4: Docs pipeline (`packages/docs`)**
+  - Acceptance: `packages/docs/build.ts` reads the content manifest, converts markdown with
+    `Bun.markdown` (isolated in `src/markdown.ts`), renders pages through a Temples layout
+    (`Renderer` + `@temples/ssr`) with nav iteration and `data-bind="html=page.content"`, and
+    writes `docs/dist/<slug>/index.html` + relative assets. Works under a subpath base.
+  - Verify: `bun run docs:build` produces valid HTML for every page; spot-check in a browser.
+  - Files: `packages/docs/{package.json,tsconfig.json}`, `packages/docs/src/**`, `packages/docs/layout.html`, `packages/docs/assets/style.css`
 
-- [x] **T7: Engine correctness fixes (from adversarial review)**
-  - Acceptance:
-    - `data-iterate` uses keyed reconciliation: rows are tracked by a key (`data-key` attribute or item `id`); re-render inserts/removes/moves only changed rows, preserving input focus and scroll.
-    - Boolean attributes (`checked`, `disabled`, `hidden`) toggle via the DOM property, not `setAttribute` (presence-based).
-    - `<select>` shorthand sets the selected option, not an inert `value` attribute.
-    - `parseLoop` no longer mis-parses `from`/`:` inside a path (`messages.from.user`); auto-naming only strips a plural `s` (`status` stays `status`).
-    - `data-render-if` restores a visible state even when the element is authored `display:none`.
-    - `render()` clears bindings whose value is `null`/`undefined` (not just `""`).
-    - `toElement` rejects or documents multi-root string sources instead of silently dropping siblings.
-    - `properties.ts` uses strict array-index detection (drop the `parseInt` heuristic).
-  - Verify: Unit tests for each fix. `bun run check` and `bun run typecheck` pass.
-  - Files: `src/engine.ts`, `src/utilities/properties.ts`, `src/engine.test.ts`
+- [x] **T5: Docs content**
+  - Acceptance: pages exist for getting started, data-binding syntax, components guide, SSR/SSG
+    guide, jQuery plugin, and API reference — all rewritten from current source with `@temples/*`
+    imports and the reactive (`this.state`) API; every code example cross-checked against tests.
+  - Verify: `bun run docs:build` builds all pages; internal links resolve.
+  - Files: `packages/docs/content/*.md`
 
-## Phase 3: SSR
+- [x] **T6: llms.txt generation**
+  - Acceptance: the build emits `docs/dist/llms.txt` from the manifest (site title, one-line
+    description per page, absolute markdown/HTML URLs).
+  - Verify: built file exists, links match the emitted pages.
+  - Files: `packages/docs/src/build.ts`
 
-- [x] **T8: ./ssr entry — linkedom wiring**
-  - Acceptance: Importing `temples/ssr` sets up a linkedom-backed DOM so `new Renderer(htmlString)` renders and `renderer.renderToString()` serializes on the server without a browser. The main entry does not statically import linkedom.
-  - Verify: Unit test run on the server creates a Renderer from an HTML string and asserts `renderToString` output matches the browser path on the same template and data. Round-trip test for entities and void tags.
-  - Files: `src/ssr.ts`, `src/ssr.test.ts`
+## Phase 5: Deploy story
 
-## Phase 4: Reactive state + Web Component
+- [x] **T7: GitHub Pages workflow + Vercel alternative**
+  - Acceptance: `.github/workflows/docs.yml` installs, builds the docs, and deploys
+    `packages/docs/dist` to GitHub Pages on push to `main`. `packages/docs/README.md` documents the
+    Vercel alternative (output dir `packages/docs/dist`).
+  - Verify: the workflow's build steps run locally without error; YAML is valid.
+  - Files: `.github/workflows/docs.yml`, `packages/docs/README.md`
 
-- [x] **T9: reactive() proxy utility**
-  - Acceptance: `reactive(target)` returns a deep proxy; mutating nested properties/arrays notifies subscribers. Subscribers can be attached and detached.
-  - Verify: Unit test mutates a nested property and an array element, asserting the subscriber fired; detaches and asserts it stops firing.
-  - Files: `src/reactive.ts`, `src/reactive.test.ts`
+## Phase 6: Release gate
 
-- [x] **T10: TemplesComponent reactive state + define()**
-  - Acceptance:
-    - `static tag`, `static template`, `static events`, `static observedAttributes`, `static attributeTypes` fields.
-    - `TodoApp.define()` parses the template once and calls `customElements.define(this.tag, this)`.
-    - `this.state` is a reactive proxy; any mutation re-renders (full re-render + keyed reconciliation).
-    - Observed attributes write into `state` (coerced via `attributeTypes`); attribute change → state → render.
-    - The old `update()`/`render()` public methods and `this.data` are removed.
-    - Templates live in the document head as `<template id="tag">`; `define()` inserts them, components clone their content into the body.
-  - Verify: Unit test defines a component, mutates `state`, asserts re-render; sets an attribute, asserts coerced state and re-render.
-  - Files: `src/component.ts`, `src/component.test.ts`
-
-## Phase 5: Events & messaging
-
-- [x] **T11: Document-level event delegation with (event, component)**
-  - Acceptance: Handlers receive `(event, component)` where `component` is a `TemplesComponent`. Each event type registers **one** document-level listener shared by every component class and instance; the listener resolves the closest `TemplesComponent` ancestor of the event target and consults only that component's `events` map (outer components are untouched). Selector matching is scoped to the resolved component. `registerEvents` is removed from the public API.
-  - Verify: Unit test registers `click .btn` and `submit .form` handlers, asserts `(event, component)` and live-event behavior (`preventDefault`, `target`). Tests cover: one listener per event type across two classes, two instances served by one listener, closest-component resolution with outer handlers ignored, selector mismatch, and events outside any component.
-  - Files: `src/component.ts`, `src/component.test.ts`
-
-- [x] **T12: emit()/on() messaging over a shared event bus**
-  - Acceptance: `this.emit(name, detail)` delivers a message named `<tag>:<name>` on a shared bus; `this.on("<tag>:<name>", handler)` subscribes and returns an unsubscribe function. Any component may talk to any other regardless of class or DOM position (loose coupling); the tag prefix keeps classes from colliding on the same local name.
-  - Verify: Unit test emits from one class and asserts a different class's `on` handler receives the message and its detail; tests cover tag-prefix separation of the same local name, no delivery to the unprefixed name, unsubscribe, and messaging without connecting to the DOM.
-  - Files: `src/component.ts`, `src/component.test.ts`
-
-## Phase 6: jQuery plugin
-
-- [ ] **T13: ./jquery entry — $.fn.temples(data)**
-  - Acceptance: Importing `temples/jquery` registers `$.fn.temples(data)` to render data into each matched element. `$.fn.temples()` returns the prepared Renderer. jQuery is a peer dependency. The absence of `$` throws a clear error.
-  - Verify: Unit test (jquery as devDependency) prepares a list template, calls `$(".list").temples(data)`, asserts rendered output. Test with two matched elements.
-  - Files: `src/jquery.ts`, `src/jquery.test.ts`
-
-## Phase 7: Tree-shakeable build
-
-- [ ] **T14: Build + public exports**
-  - Acceptance:
-    - `src/index.ts` exports `Renderer`, `TemplesComponent`, `reactive`, `registerEvents`, `EventMap`, and the data types.
-    - `package.json` sets `"sideEffects": ["./dist/ssr.js"]` (the SSR entry is the only side-effectful output; `prepare()` installs the linkedom DOM on `globalThis`).
-    - `bun run build` emits ESM to `dist/` (`index.js`, `engine.js`, `ssr.js`, `jquery.js`).
-    - The main bundle contains no linkedom/jquery (tree-shake check). `dist/ssr.js` imports in a clean Node process without pre-installed DOM globals.
-  - Verify: `bun run build` succeeds; inspect `dist/index.js` exports and confirm no `linkedom`/`jquery` import; `node -e "import('./dist/ssr.js').then(m => m.prepare(...))"` renders.
-  - Files: `src/index.ts`, `package.json`, build script.
-
-## Phase 8: Example (TODO app, real integration test)
-
-- [ ] **T15: TODO app example — no bundling**
-  - Acceptance:
-    - `example/index.html` loads `../dist/index.js` via `<script type="module">`; no Bun `.html`/`.ts` import magic.
-    - Components: `todo-app` (list + input + form), `todo-item` (keyed row), `todo-counter` (messaging consumer via `on("todo-count-changed")`).
-    - Demonstrates reactive state, keyed list, two-way input, `submit` with `preventDefault`, and `emit`/`on`.
-    - `demo` script = `bun run build` then static serve of `example/`.
-  - Verify: Run `bun run demo`, open the page in a browser (or `agent-browser`), add/remove/complete todos, confirm the counter updates. Screenshot for evidence.
-  - Files: `example/index.html`, `example/components/*.js`, `example/demo.css`, `package.json`.
-
-- [ ] **T16: README + example/README review**
-  - Acceptance: README reflects the reactive-state API, `(event, component)` handlers, `emit`/`on`, keyed reconciliation, and the no-bundling example. Cross-check every code example.
-  - Verify: Read the README against the actual code. Cross-check every code example in the README against the real implementation.
-  - Files: `README.md`, `example/README.md`
-
-## Phase 9: SSR `prepare()` templating API
-
-Spec: `tasks/spec-ssr-prepare.md`.
-
-- [x] **T17: TemplesComponent — `static css` + global store in `define()`**
-  - Acceptance:
-    - `TemplesComponent` gains `static css = ""`.
-    - `define(options?: { globalStore?: TemplesData })` stores the store; `define()` stays callable with no args.
-    - On mount, a component resolves each observed attribute with precedence: explicit attribute on the tag **wins**, then the global store key of the same name, then the default.
-  - Verify: Unit test defines a component with `define({ globalStore })`, mounts it with and without an explicit attribute, asserts the store seeds the attribute and the explicit attribute masks the store.
-  - Files: `src/component.ts`, `src/component.test.ts`
-
-- [x] **T18: `prepare(source, options)` — reusable `render(data) => string`**
-  - Acceptance:
-    - `prepare(source)` returns `render(data) => string`; `source` is string-only and must have a single root element (throws otherwise).
-    - Each `render(data)` call is independent (fresh render, no state leak with partial data).
-    - Default output strips `data-*` control attributes.
-  - Verify: Unit test prepares a template, renders two data sets, asserts independent correct strings; multi-root source throws.
-  - Files: `src/ssr.ts`, `src/ssr.test.ts`
-
-- [x] **T19: `prepare` `webComponents` — render TemplesComponent usages**
-  - Acceptance:
-    - `webComponents: [Ctor]` registers each class and renders its custom tag to its `template` markup.
-    - Each used component's `css` is concatenated into one `<style>` tag in the output.
-    - The global store seeds a component's observed attributes.
-  - Verify: Unit test renders a template containing a custom tag with `webComponents`, asserts the tag renders its template and the `<style>` holds the concatenated css.
-  - Files: `src/ssr.ts`, `src/component.ts`, `src/ssr.test.ts`
-
-- [x] **T20: `prepare` `removeDataBinding` — strip component traces**
-  - Acceptance: `removeDataBinding: true` renders every used component to its plain static markup (no custom tag, no `data-*`), with no Temples footprint.
-  - Verify: Unit test renders a custom tag with `removeDataBinding: true`, asserts no custom tag and no `data-*` in the output.
-  - Files: `src/ssr.ts`, `src/ssr.test.ts`
-
-- [ ] **T21: `prepare` `rehydrate` — include library, components active (final, hardest)**
-  - Acceptance: `rehydrate: true` includes the TemplesComponent library in the page source so custom elements mount and activate in the browser.
-  - Verify: Unit test asserts the output includes the library and the custom tags remain active.
-  - Files: `src/ssr.ts`, `src/ssr.test.ts`
-  - Notes: Deferred to a later slice; requires engine support to preserve control attributes.
+- [x] **T8: Version 1.0.0 + CHANGELOG + final gate**
+  - Acceptance: all packages at 1.0.0; `CHANGELOG.md` records the restructure, the scoped names,
+    and the docs site; full gate green; publish checklist (engine → components → ssr → jquery) in
+    the root README or RELEASE.md.
+  - Verify: `bun run check && bun run typecheck && bun test && bun run build` green; all four `bun publish --dry-run` clean.
+  - Files: `packages/*/package.json`, `CHANGELOG.md`, `RELEASE.md` (or root README section)
