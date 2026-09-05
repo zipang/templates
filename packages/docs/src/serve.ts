@@ -1,58 +1,33 @@
-/** Static file server for the built documentation site. */
+import { join } from "node:path";
 
-/** File extensions served with an explicit Content-Type. */
-const MIME_TYPES: Record<string, string> = {
-	".html": "text/html; charset=utf-8",
-	".css": "text/css; charset=utf-8",
-	".js": "text/javascript; charset=utf-8",
-	".txt": "text/plain; charset=utf-8",
-	".json": "application/json",
-	".png": "image/png",
-	".svg": "image/svg+xml",
-	".ico": "image/x-icon"
-};
+/** Static file server for the built documentation site inside dist/. */
 
-/**
- * Resolve a request path to a file inside the built site.
- *
- * `/` maps to `index.html`, extension-less paths get `.html` appended, and
- * traversal outside `dist/` resolves to `null`.
- *
- * @param pathname - The URL pathname of the request.
- * @returns The path to serve, or `null` when the request cannot be served.
- */
-const resolveFile = (pathname: string): string | null => {
-	const distDir = `${import.meta.dir}/../dist`;
-	const decoded = decodeURIComponent(pathname);
-	const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
-	const withSuffix = relative === "" || relative.endsWith("/") ? `${relative}index.html` : relative;
-	const candidate = `${distDir}/${withSuffix}`;
-
-	if (!candidate.startsWith(distDir)) {
-		return null;
-	}
-
-	return candidate;
-};
+/** Directory holding the built site. */
+const distDir = join(import.meta.dir, "../dist");
 
 const server = Bun.serve({
 	port: Number(process.env.PORT ?? 4173),
+	routes: {
+		"/": new Response(Bun.file(`${distDir}/index.html`))
+	},
+	/**
+	 * Serve an unmatched request from the built site, falling back to the 404 page.
+	 *
+	 * The pathname comes from `new URL`, which already resolves dot segments, and
+	 * is used as-is: only paths naming a real file inside `dist/` are served.
+	 *
+	 * @param request - The incoming request.
+	 * @returns The file response, or the built 404 page with status 404.
+	 */
 	async fetch(request) {
 		const { pathname } = new URL(request.url);
-		let file = resolveFile(pathname);
+		const file = Bun.file(`${distDir}${pathname}`);
 
-		if (file === null || !(await Bun.file(file).exists())) {
-			file = resolveFile("/index.html");
+		if (await file.exists()) {
+			return new Response(file);
 		}
 
-		if (file === null) {
-			return new Response("Not found", { status: 404 });
-		}
-
-		const extension = file.slice(file.lastIndexOf("."));
-		const contentType = MIME_TYPES[extension] ?? "application/octet-stream";
-
-		return new Response(Bun.file(file), { headers: { "Content-Type": contentType } });
+		return new Response(Bun.file(`${distDir}/404.html`), { status: 404 });
 	}
 });
 

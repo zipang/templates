@@ -21,6 +21,7 @@ interface PageSource {
 	title: string;
 	description: string;
 	order: number;
+	hidden: boolean;
 	markdown: string;
 }
 
@@ -91,6 +92,7 @@ const loadPages = async (): Promise<PageSource[]> => {
 				title: fields.title,
 				description: fields.description ?? "",
 				order: Number(fields.order ?? 100),
+				hidden: fields.hidden === "true",
 				markdown: body
 			};
 		})
@@ -130,18 +132,21 @@ const buildLlmsTxt = (pages: PageMeta[]): string => {
  *
  * Every markdown page is converted to HTML, rendered through the Temples
  * layout with `@temples/ssr`, and written as `<slug>.html`. The stylesheet
- * and an `llms.txt` agent index are emitted alongside.
+ * and an `llms.txt` agent index are emitted alongside. Pages with
+ * `hidden: true` are built but excluded from the navigation and `llms.txt`.
  *
  * @returns The metadata of every built page.
  */
 export const buildSite = async (): Promise<PageMeta[]> => {
 	const sources = await loadPages();
-	const metas: PageMeta[] = sources.map((page) => ({
-		slug: page.slug,
-		title: page.title,
-		description: page.description,
-		url: `${page.slug}.html`
-	}));
+	const metas: PageMeta[] = sources
+		.filter((source) => !source.hidden)
+		.map((page) => ({
+			slug: page.slug,
+			title: page.title,
+			description: page.description,
+			url: `${page.slug}.html`
+		}));
 
 	const layout = await Bun.file(`${DOCS_DIR}/layout.html`).text();
 	const renderLayout = prepare(layout, { removeDataBindings: false });

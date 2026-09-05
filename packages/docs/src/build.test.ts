@@ -7,21 +7,35 @@ describe("docs build", () => {
 
 		expect(pages.length).toBeGreaterThanOrEqual(3);
 
-		const index = await Bun.file(import.meta.dir + "/../dist/index.html").text();
+		const index = await Bun.file(`${import.meta.dir}/../dist/index.html`).text();
 
 		expect(index).toContain("<!DOCTYPE html>");
 		expect(index).toContain("assets/style.css");
 
-		const llms = await Bun.file(import.meta.dir + "/../dist/llms.txt").text();
+		const llms = await Bun.file(`${import.meta.dir}/../dist/llms.txt`).text();
 
 		expect(llms).toContain("# Temples documentation");
 		expect(llms).toContain("## Pages");
 
 		for (const page of pages) {
-			const html = await Bun.file(import.meta.dir + `/../dist/${page.url}`).text();
+			const html = await Bun.file(`${import.meta.dir}/../dist/${page.url}`).text();
 
 			expect(html).toContain("<!DOCTYPE html>");
 			expect(html).toContain(`href="${page.url}"`);
 		}
+	});
+
+	test("builds a 404 page that is excluded from the navigation and llms.txt", async () => {
+		await buildSite();
+
+		const index = await Bun.file(`${import.meta.dir}/../dist/index.html`).text();
+		const llms = await Bun.file(`${import.meta.dir}/../dist/llms.txt`).text();
+		const notFound = await Bun.file(`${import.meta.dir}/../dist/404.html`).text();
+
+		expect(notFound).toContain("Page not found");
+		expect(notFound).toContain('href="getting-started.html"');
+
+		expect(index).not.toContain('href="404.html"');
+		expect(llms).not.toContain("404");
 	});
 });
