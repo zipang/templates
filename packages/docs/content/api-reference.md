@@ -16,9 +16,10 @@ The standalone rendering engine. One instance renders one template.
 new Renderer(source: Element | string)
 ```
 
-The source is a DOM element or an HTML string. The string form is parsed once into a container;
-the element form binds in place. The caller owns the instance — there is no registry and nothing
-to destroy; release the renderer by dropping the reference.
+The source is a DOM element, an element id (`"#id"`), or an HTML string. An id string binds the
+existing page element in place, so every render writes into the live DOM; an unknown id throws.
+An HTML string is parsed once into a container. The caller owns the instance — there is no
+registry and nothing to destroy; release the renderer by dropping the reference.
 
 | Member | Returns | Description |
 |--------|---------|-------------|

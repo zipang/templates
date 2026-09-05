@@ -27,7 +27,7 @@ Build a `Renderer` from a DOM element or an HTML string, then render data into i
 ```javascript
 import { Renderer } from "@temples/engine";
 
-const renderer = new Renderer(document.getElementById("logged-user"));
+const renderer = new Renderer("#logged-user");
 renderer.render({
     user: {
         avatar: "http://avatar.com/johndoe",
@@ -35,6 +35,10 @@ renderer.render({
     },
 });
 ```
+
+The constructor source is an element id (`"#id"`), a DOM element, or an HTML string. An id string
+binds the existing page element in place, so every render writes into the live DOM. An unknown id
+throws a clear error.
 
 ### Binding attributes
 

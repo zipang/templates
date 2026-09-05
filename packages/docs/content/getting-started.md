@@ -35,12 +35,13 @@ attribute per bound element:
 The sample content stays visible before any data arrives — designers work on real pages, and the
 bindings never break their markup.
 
-Build a `Renderer` from the element and render a data dictionary into it:
+Build a `Renderer` from the template and render a data dictionary into it. The source is an
+element id, a DOM element, or an HTML string:
 
 ```javascript
 import { Renderer } from "@temples/engine";
 
-const renderer = new Renderer(document.getElementById("logged-user"));
+const renderer = new Renderer("#logged-user");
 
 renderer.render({
     user: {
@@ -50,15 +51,17 @@ renderer.render({
 });
 ```
 
-The binding paths (`user.avatar`, `user.fullname`) resolve against the data dictionary you pass.
-See [Data-binding syntax](binding-syntax.html) for the complete reference.
-
-A template source can also be an HTML string:
+A string starting with `#` names an element already in the page: the renderer binds it in place,
+so every render writes into the live DOM. An unknown id throws a clear error. The other forms
+bind a detached element or a freshly parsed fragment:
 
 ```javascript
-const renderer = new Renderer("<h1 data-bind='article.title'>Title</h1>");
-renderer.render({ article: { title: "The Great Race" } });
+const fromElement = new Renderer(document.getElementById("logged-user"));
+const fromString = new Renderer("<h1 data-bind='article.title'>Title</h1>");
 ```
+
+The binding paths (`user.avatar`, `user.fullname`) resolve against the data dictionary you pass.
+See [Data-binding syntax](binding-syntax.html) for the complete reference.
 
 ## Partial updates
 

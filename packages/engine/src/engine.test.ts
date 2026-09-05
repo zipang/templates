@@ -22,6 +22,38 @@ describe("Renderer", () => {
 		expect(renderer.rootElt.textContent).toBe("Hello");
 	});
 
+	test("accepts an element id (#id) as the template source", () => {
+		const el = document.createElement("p");
+		el.id = "greeting-tpl";
+		el.setAttribute("data-bind", "text=greeting");
+		el.textContent = "placeholder";
+		document.body.appendChild(el);
+
+		const renderer = new Renderer("#greeting-tpl");
+
+		renderer.render({ greeting: "Hello" });
+
+		expect(renderer.rootElt).toBe(el);
+		expect(renderer.rootElt.textContent).toBe("Hello");
+	});
+
+	test("an element id source collects bindings from the live element", () => {
+		const el = document.createElement("div");
+		el.id = "user-tpl";
+		el.innerHTML = "<span data-bind='user.name'>placeholder</span>";
+		document.body.appendChild(el);
+
+		const renderer = new Renderer("#user-tpl");
+
+		renderer.render({ user: { name: "Jane" } });
+
+		expect(el.querySelector("span")?.textContent).toBe("Jane");
+	});
+
+	test("throws a clear error for an unknown element id", () => {
+		expect(() => new Renderer("#no-such-element")).toThrow("No element with id");
+	});
+
 	test("text= binding sets text content and escapes HTML markup", () => {
 		const renderer = new Renderer("<p data-bind='text=markup'></p>");
 

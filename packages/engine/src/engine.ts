@@ -39,6 +39,10 @@ export type TemplesDataValue =
 /**
  * Give the renderer one stable root element to bind against and re-render.
  *
+ * A string starting with `#` names an element already in the page: the element
+ * with that id is bound in place, so a re-render writes into the live DOM. An
+ * unknown id throws, because a renderer bound to nothing is always a mistake.
+ *
  * An HTML string is a fragment, not an element: it can contain several
  * sibling elements or only text, so it has no single element identity. The
  * challenge is to collapse any fragment to one element. Parsing inside a
@@ -47,11 +51,21 @@ export type TemplesDataValue =
  * fragment yields no element at all. A DOM element source is already a root
  * and is returned unchanged.
  *
- * @param source - DOM element or HTML string.
+ * @param source - DOM element, element id (`"#id"`), or HTML string.
  * @returns A single element usable as the template root.
  */
-const toElement = (source: Element | string): Element => {
+const getSourceElement = (source: Element | string): Element => {
 	if (typeof source === "string") {
+		if (source.startsWith("#")) {
+			const element = document.getElementById(source.slice(1));
+
+			if (element === null) {
+				throw new Error(`No element with id ${source}`);
+			}
+
+			return element;
+		}
+
 		const container = document.createElement("div");
 		container.innerHTML = source.trim();
 
@@ -589,16 +603,17 @@ const collectBindings = (root: Element): Binding[] => {
 /**
  * Standalone, DOM-based renderer for a single template.
  *
- * Parses the template source once into a DOM element and collects every
- * binding. Each render call applies only the bindings whose paths resolve in
- * the provided data.
+ * The source is a DOM element, an element id (`"#id"`) to bind in place, or
+ * an HTML string. The source resolves once into a DOM element and every
+ * binding is collected. Each render call applies only the bindings whose
+ * paths resolve in the provided data.
  */
 export class Renderer {
 	readonly rootElt: Element;
 	private readonly bindings: Binding[];
 
 	constructor(source: Element | string) {
-		this.rootElt = toElement(source);
+		this.rootElt = getSourceElement(source);
 		this.bindings = collectBindings(this.rootElt);
 	}
 
