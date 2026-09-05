@@ -270,45 +270,21 @@ const parseBindings = (expr: string, el: Element): ParsedBinding[] => {
 	return bindings;
 };
 
-type Binding = { path: string; apply: (data: TemplesData, root: Element) => void };
-
-/**
- * Resolve the element at an index path from a root.
- *
- * Bindings are root-relative so the same binding can target the template root
- * or any clone of it (used by `data-iterate` to re-apply values to live rows).
- *
- * @param root - The root element the path starts from.
- * @param indexPath - Child indexes from the root to the target element.
- * @returns The target element.
- */
-const elementAt = (root: Element, indexPath: number[]): Element => {
-	let el: Element = root;
-
-	for (const i of indexPath) {
-		const child = el.children[i];
-
-		if (child === undefined) {
-			throw new Error("Binding index path is out of range");
-		}
-
-		el = child;
-	}
-
-	return el;
-};
+type Binding = { path: string; apply: (data: TemplesData) => void; restore?: () => void };
 
 /**
  * Build the closure that applies one binding to its element during render.
  *
- * @param indexPath - Child indexes locating the bound element from the root.
+ * The binding captures its element at collection time: every render call
+ * writes straight into that element, so no lookup runs at render time.
+ *
+ * @param el - The bound element, captured for every future render.
  * @param parsed - The parsed binding.
  * @returns A binding that applies one `data-bind` expression during render.
  */
-const buildBinding = (indexPath: number[], parsed: ParsedBinding): Binding => ({
+const buildBinding = (el: Element, parsed: ParsedBinding): Binding => ({
 	path: parsed.path,
-	apply: (data: TemplesData, root: Element) => {
-		const el = elementAt(root, indexPath);
+	apply: (data: TemplesData) => {
 		const raw = getProperty(data, parsed.path, "");
 
 		const value =
@@ -339,6 +315,20 @@ const buildBinding = (indexPath: number[], parsed: ParsedBinding): Binding => ({
 		}
 	}
 });
+
+/**
+ * Evaluate a conditional path against the data.
+ *
+ * The path may hold a boolean, another scalar, or a function returning one
+ * (called with its owner object as `this`). A path that resolves to nothing
+ * counts as false.
+ *
+ * @param data - The data dictionary of the current render.
+ * @param path - The path to resolve the condition from.
+ * @returns The truthiness of the resolved value.
+ */
+const evalCondition = (data: TemplesData, path: string): boolean =>
+	Boolean(getProperty(data, path, null));
 
 /**
  * Strip a trailing plural `s` from a collection name for auto-naming.
@@ -426,34 +416,79 @@ const getItemKey = (item: unknown, keyPath: string | null): string | null => {
 };
 
 /**
+ * One stamped row of a loop: its element and the bindings that drive it.
+ *
+ * The bindings are collected on the row element at stamping time and capture
+ * that row's actual nodes. The row owns them for its whole lifetime, so a
+ * re-render re-applies them without any lookup.
+ */
+interface LoopRow {
+	node: Element;
+	bindings: Binding[];
+	conditionals: Binding[];
+}
+
+/**
+ * Collect the bindings of one loop row.
+ *
+ * The row element carries the control attributes at this point (the loop
+ * template stays pristine as the clone source), so the collection strips
+ * them and captures the row's real elements. Nested loops inside the row are
+ * collected at this level too, each with its own detached sub-template.
+ *
+ * @param node - The freshly cloned row element.
+ * @returns The row, ready to be reconciled.
+ */
+const collectRow = (node: Element): LoopRow => {
+	const bindings = collectBindings(node);
+
+	return { node, bindings, conditionals: bindings.filter((binding) => binding.restore) };
+};
+
+/**
+ * Apply one row's bindings against an item context.
+ *
+ * The conditional bindings restore their elements first, so a removed
+ * conditional comes back before the values are re-applied.
+ *
+ * @param row - The row to update.
+ * @param context - The data dictionary, with the loop variable injected.
+ */
+const applyRow = (row: LoopRow, context: TemplesData): void => {
+	for (const conditional of row.conditionals) conditional.restore?.();
+
+	for (const binding of row.bindings) binding.apply(context);
+};
+
+/**
  * Build the binding that stamps one sub-template clone per collection item.
  *
  * The first child of the iterate element is the sub-template. It is detached
- * at construction and its bindings are collected once. On render, items are
- * reconciled by key (`data-key` or item `id`): rows that keep their key are
- * reused in place, so input focus and scroll survive; new keys clone a fresh
- * row and removed keys are dropped. Without keys, the list re-stamps.
+ * at construction and kept as the pristine clone source. New items clone it
+ * and collect a fresh set of bindings that capture the clone's own nodes;
+ * items reconciled by key (`data-key` or item `id`) keep their row and have
+ * the row's bindings re-applied, so input focus and scroll survive. Rows
+ * whose key disappears are dropped together with their bindings. Without
+ * keys, the list re-stamps on every render.
  *
- * @param indexPath - Child indexes locating the iterate container.
+ * @param el - The iterate container element.
  * @param template - The detached sub-template element.
  * @param loopExpr - The `data-iterate` or `data-each` attribute value.
  * @param keyPath - The `data-key` path, or null when not declared.
  * @returns A binding that reconciles the items on every render.
  */
 const buildIterate = (
-	indexPath: number[],
+	el: Element,
 	template: Element,
 	loopExpr: string,
 	keyPath: string | null
 ): Binding => {
 	const { varName, collectionPath } = parseLoop(loopExpr);
-	const subBindings = collectBindings(template);
-	let rendered = new Map<string, Element>();
+	let rendered = new Map<string, LoopRow>();
 
 	return {
 		path: collectionPath,
-		apply: (data: TemplesData, root: Element) => {
-			const el = elementAt(root, indexPath);
+		apply: (data: TemplesData) => {
 			const value = getProperty<unknown>(data, collectionPath, null);
 			const collection = Array.isArray(value) ? (value as TemplesDataValue[]) : [];
 
@@ -463,29 +498,31 @@ const buildIterate = (
 			const fragment = document.createDocumentFragment();
 
 			if (keyable) {
-				const next = new Map<string, Element>();
+				const next = new Map<string, LoopRow>();
 
 				for (const { key, item } of keyed) {
 					const k = key as string;
-					const existing = rendered.get(k);
-					const node = existing ?? (template.cloneNode(true) as Element);
 					const context = { ...data, [varName]: item };
+					let row = rendered.get(k);
 
-					for (const binding of subBindings) binding.apply(context, node);
+					if (row === undefined) {
+						row = collectRow(template.cloneNode(true) as Element);
+					}
 
-					next.set(k, node);
-					fragment.appendChild(node);
+					applyRow(row, context);
+
+					next.set(k, row);
+					fragment.appendChild(row.node);
 				}
 
 				rendered = next;
 			} else {
 				for (const item of collection) {
-					const node = template.cloneNode(true) as Element;
-					const context = { ...data, [varName]: item };
+					const row = collectRow(template.cloneNode(true) as Element);
 
-					for (const binding of subBindings) binding.apply(context, node);
+					applyRow(row, { ...data, [varName]: item });
 
-					fragment.appendChild(node);
+					fragment.appendChild(row.node);
 				}
 
 				rendered = new Map();
@@ -497,33 +534,165 @@ const buildIterate = (
 };
 
 /**
+ * Prefix of the comment placeholders swapped in for removed conditionals.
+ *
+ * The prefix identifies engine-owned comments, so `stripPlaceholders` removes
+ * them without touching the template's own comments.
+ */
+const PLACEHOLDER_PREFIX = "Temples says:";
+
+/**
+ * Remove the engine's conditional placeholders from a subtree.
+ *
+ * A removed conditional leaves a comment placeholder in the live tree to hold
+ * its slot. These comments carry the engine prefix, so the walk deletes only
+ * them and leaves every authored comment in place.
+ *
+ * @param root - The subtree to clean.
+ */
+export const stripPlaceholders = (root: Element): void => {
+	const walk = (node: Node): void => {
+		for (const child of Array.from(node.childNodes)) {
+			if (child.nodeType === 8 && (child as Comment).data.startsWith(PLACEHOLDER_PREFIX)) {
+				child.remove();
+			} else {
+				walk(child);
+			}
+		}
+	};
+
+	walk(root);
+};
+
+/**
+ * Serialize an element without the engine's runtime artifacts.
+ *
+ * The subtree is cloned first: the live tree keeps its placeholders so later
+ * renders can restore their elements, while the returned markup carries none.
+ *
+ * @param root - The element to serialize.
+ * @returns The serialized HTML of the cleaned clone.
+ */
+const serializeClean = (root: Element): string => {
+	const clone = root.cloneNode(true) as Element;
+
+	stripPlaceholders(clone);
+
+	return clone.outerHTML;
+};
+
+/**
+ * Build the binding that renders or removes an element by condition.
+ *
+ * A truthy condition keeps the element in the DOM; a falsy condition swaps
+ * it for a comment placeholder that holds its slot. The element reference
+ * stays in the closure, so a later truthy render re-inserts it at its exact
+ * former position. The placeholder names the condition, which keeps the live
+ * tree readable; serialization strips these comments again.
+ *
+ * @param el - The conditioned element.
+ * @param condition - The path to resolve the condition from.
+ * @returns A binding that toggles the element's presence.
+ */
+const buildRenderIf = (el: Element, condition: string): Binding => {
+	let placeholder: Comment | null = null;
+
+	return {
+		path: condition,
+		apply: (data: TemplesData) => {
+			if (evalCondition(data, condition)) {
+				if (placeholder !== null) {
+					placeholder.replaceWith(el);
+					placeholder = null;
+				}
+			} else if (placeholder === null) {
+				placeholder = document.createComment(`${PLACEHOLDER_PREFIX} ${condition}=false`);
+				el.replaceWith(placeholder);
+			}
+		},
+		restore: () => {
+			if (placeholder !== null) {
+				placeholder.replaceWith(el);
+				placeholder = null;
+			}
+		}
+	};
+};
+
+/**
+ * Toggle the inline `display` of an element.
+ *
+ * Showing clears the display declaration (restoring the element's natural
+ * visibility, even when authored `display:none`); hiding sets
+ * `display:none`. An emptied style attribute is removed, so the markup does
+ * not keep an empty `style` attribute around.
+ *
+ * @param el - The target element.
+ * @param show - True to show the element, false to hide it.
+ */
+const toggleDisplay = (el: Element, show: boolean): void => {
+	const style = (el as HTMLElement).style;
+
+	if (show) {
+		style.removeProperty("display");
+
+		if (style.length === 0) el.removeAttribute("style");
+	} else {
+		style.display = "none";
+	}
+};
+
+/**
  * Build the binding that shows or hides an element by condition.
  *
- * A truthy condition clears the inline `display` (restoring the element's
- * natural visibility, even when authored `display:none`); a falsy condition
- * hides it with `display:none`.
+ * A truthy condition restores the element's natural visibility; a falsy
+ * condition hides it with `display:none`. The element always stays in the
+ * DOM: this is a visibility toggle, not a structural change. The polarity
+ * matches `data-render-if` — a truthy condition shows.
  *
- * @param indexPath - Child indexes locating the conditioned element.
+ * @param el - The conditioned element.
  * @param condition - The path to resolve the condition from.
  * @returns A binding that toggles the element's display.
  */
-const buildRenderIf = (indexPath: number[], condition: string): Binding => ({
+const buildShowIf = (el: Element, condition: string): Binding => ({
 	path: condition,
-	apply: (data: TemplesData, root: Element) => {
-		const el = elementAt(root, indexPath) as HTMLElement;
-		el.style.display = getProperty(data, condition, "") ? "" : "none";
+	apply: (data: TemplesData) => {
+		toggleDisplay(el, evalCondition(data, condition));
+	}
+});
+
+/**
+ * Build the binding that hides or shows an element by condition.
+ *
+ * The inverse of `data-show-if`: a truthy condition hides the element with
+ * `display:none`, a falsy condition shows it. Useful when the data names the
+ * hiding state itself (`data-hide-if="article.hidden"`).
+ *
+ * @param el - The conditioned element.
+ * @param condition - The path to resolve the condition from.
+ * @returns A binding that toggles the element's display.
+ */
+const buildHideIf = (el: Element, condition: string): Binding => ({
+	path: condition,
+	apply: (data: TemplesData) => {
+		toggleDisplay(el, !evalCondition(data, condition));
 	}
 });
 
 /**
  * Collect every binding within a root element.
  *
- * Each binding targets one element: a `data-bind` applies values, a
- * `data-render-if` shows or hides, and a `data-iterate` reconciles sub-template
- * clones. Control attributes are removed so the rendered output stays clean.
- * The root itself is included when it carries a control attribute. Bindings
- * are captured once, at construction time, and are root-relative so they can
- * target clones.
+ * Each binding captures its element at collection time: a `data-bind` applies
+ * values, `data-render-if`, `data-show-if`, and `data-hide-if` evaluate a
+ * condition, and a `data-iterate` stamps sub-template clones. Control
+ * attributes are removed so the rendered output stays clean. The root itself
+ * is included when it carries a control attribute, except for
+ * `data-render-if`: the root is the mount point, so a conditional there
+ * cannot be expressed and throws.
+ *
+ * The walk does not descend into a loop container: the loop sub-template is
+ * detached and kept pristine, and each stamped row is collected on its own
+ * when it enters the DOM.
  *
  * @param root - The template root element.
  * @returns Array of bindings, applied in document order.
@@ -531,7 +700,7 @@ const buildRenderIf = (indexPath: number[], condition: string): Binding => ({
 const collectBindings = (root: Element): Binding[] => {
 	const bindings: Binding[] = [];
 
-	const collect = (el: Element, indexPath: number[]): void => {
+	const collect = (el: Element): void => {
 		const loopExpr = el.getAttribute("data-iterate") || el.getAttribute("data-each");
 
 		if (loopExpr) {
@@ -543,7 +712,7 @@ const collectBindings = (root: Element): Binding[] => {
 				if (parsed.length > 0) {
 					el.removeAttribute("data-bind");
 
-					for (const binding of parsed) bindings.push(buildBinding(indexPath, binding));
+					for (const binding of parsed) bindings.push(buildBinding(el, binding));
 				}
 			}
 
@@ -564,16 +733,37 @@ const collectBindings = (root: Element): Binding[] => {
 			el.removeAttribute("data-iterate");
 			el.removeAttribute("data-each");
 
-			bindings.push(buildIterate(indexPath, template, loopExpr, keyPath));
-
-			return;
+			bindings.push(buildIterate(el, template, loopExpr, keyPath));
 		}
 
-		const condition = el.getAttribute("data-render-if");
+		const renderIf = el.getAttribute("data-render-if");
 
-		if (condition) {
+		if (renderIf !== null) {
 			el.removeAttribute("data-render-if");
-			bindings.push(buildRenderIf(indexPath, condition));
+
+			if (el === root) {
+				throw new Error(
+					"data-render-if cannot sit on the template root: the root is the mount point"
+				);
+			}
+
+			bindings.push(buildRenderIf(el, renderIf));
+		}
+
+		const showIf = el.getAttribute("data-show-if");
+
+		if (showIf !== null) {
+			el.removeAttribute("data-show-if");
+
+			bindings.push(buildShowIf(el, showIf));
+		}
+
+		const hideIf = el.getAttribute("data-hide-if");
+
+		if (hideIf !== null) {
+			el.removeAttribute("data-hide-if");
+
+			bindings.push(buildHideIf(el, hideIf));
 		}
 
 		const bindExpr = el.getAttribute("data-bind");
@@ -584,18 +774,18 @@ const collectBindings = (root: Element): Binding[] => {
 			if (parsed.length > 0) {
 				el.removeAttribute("data-bind");
 
-				for (const binding of parsed) bindings.push(buildBinding(indexPath, binding));
+				for (const binding of parsed) bindings.push(buildBinding(el, binding));
 			}
 		}
 
 		for (let i = 0; i < el.children.length; i++) {
 			const child = el.children[i];
 
-			if (child !== undefined) collect(child, [...indexPath, i]);
+			if (child !== undefined) collect(child);
 		}
 	};
 
-	collect(root, []);
+	collect(root);
 
 	return bindings;
 };
@@ -605,32 +795,40 @@ const collectBindings = (root: Element): Binding[] => {
  *
  * The source is a DOM element, an element id (`"#id"`) to bind in place, or
  * an HTML string. The source resolves once into a DOM element and every
- * binding is collected. Each render call applies only the bindings whose
- * paths resolve in the provided data.
+ * binding is collected; each binding captures its own element, so a render
+ * never looks elements up. Each render call first restores the elements a
+ * conditional removed, then applies only the bindings whose paths resolve in
+ * the provided data.
  */
 export class Renderer {
 	readonly rootElt: Element;
 	private readonly bindings: Binding[];
+	private readonly conditionals: Binding[];
 
 	constructor(source: Element | string) {
 		this.rootElt = getSourceElement(source);
 		this.bindings = collectBindings(this.rootElt);
+		this.conditionals = this.bindings.filter((binding) => binding.restore);
 	}
 
 	/**
 	 * Render the bindings whose paths are present in the provided data.
 	 *
-	 * Every binding is applied when its path resolves in the data. A path
-	 * absent from the data keeps its current state. A partial dictionary
-	 * re-renders only the paths it carries, while a full dictionary
-	 * re-renders every present path.
+	 * Conditional elements removed by an earlier render come back first, so
+	 * the values of the current render apply to a complete tree. A path
+	 * absent from the data keeps its current state: a partial dictionary
+	 * re-renders only the paths it carries.
 	 *
 	 * @param data - Data dictionary; the paths it carries are rendered.
 	 * @returns The rendered root element.
 	 */
 	render(data: TemplesData): Element {
+		for (const conditional of this.conditionals) {
+			if (hasProperty(data, conditional.path)) conditional.restore?.();
+		}
+
 		for (const binding of this.bindings) {
-			if (hasProperty(data, binding.path)) binding.apply(data, this.rootElt);
+			if (hasProperty(data, binding.path)) binding.apply(data);
 		}
 
 		return this.rootElt;
@@ -652,8 +850,12 @@ export class Renderer {
 
 		setProperty(data, path, value);
 
+		for (const conditional of this.conditionals) {
+			if (conditional.path === path) conditional.restore?.();
+		}
+
 		for (const binding of this.bindings) {
-			if (binding.path === path) binding.apply(data, this.rootElt);
+			if (binding.path === path) binding.apply(data);
 		}
 
 		return this.rootElt;
@@ -663,13 +865,14 @@ export class Renderer {
 	 * Serialize the rendered root to an HTML string.
 	 *
 	 * The root element is the template root, so its outer HTML carries every
-	 * rendered binding. Control attributes were removed at construction, so the
-	 * markup stays clean.
+	 * rendered binding. Control attributes were removed at construction and
+	 * conditional placeholders are stripped from a clone, so the markup stays
+	 * clean while the live tree keeps its state.
 	 *
 	 * @returns The serialized HTML of the root element.
 	 */
 	toHtml(): string {
-		return this.rootElt.outerHTML;
+		return serializeClean(this.rootElt);
 	}
 
 	/**

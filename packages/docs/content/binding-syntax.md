@@ -1,6 +1,6 @@
 ---
 title: Data-binding syntax
-description: The complete reference of data-bind, data-iterate, and data-render-if.
+description: The complete reference of data-bind, data-iterate, data-render-if, data-show-if, and data-hide-if.
 order: 2
 ---
 
@@ -128,34 +128,52 @@ When the collection changes, Temples reconciles: unchanged rows keep their DOM e
 rows are deleted, new rows are inserted, and rows are moved to match the new order. Input focus,
 scroll position, and animations survive a re-render.
 
-## `data-render-if` — conditionals
+## Conditionals — `data-render-if`, `data-show-if`, `data-hide-if`
 
-The element renders only when the condition is truthy:
+All three conditions share the polarity: a **truthy** value means *render* or *show*. The
+difference is the mechanism.
+
+`data-render-if` controls the **presence** of the element. A truthy condition keeps it in the
+DOM; a falsy condition removes it and a comment placeholder holds its slot, so the element
+comes back at its exact former place when the condition turns truthy again:
 
 ```html
 <div class="icon" data-render-if="article.featured">
     <img src="featured.png" />
 </div>
+```
 
-<div class="icon" data-render-if="article.popular">
+`data-show-if` controls the **visibility** of the element, with the same polarity. A truthy
+condition clears the inline `display`; a falsy condition hides the element with
+`display:none`. The element always stays in the DOM:
+
+```html
+<div class="icon" data-show-if="article.popular">
     <img src="popular.png" />
 </div>
 ```
 
-When the condition turns falsy, the element hides; when it turns truthy again, the element
-shows. The condition may be a function in the data (see the top of this page). The hiding uses
-the element's `display` style, so an element authored `display: none` is restored correctly.
+`data-hide-if` is the inverse of `data-show-if`: a truthy condition hides. Use it when the
+data names the hiding state itself:
+
+```html
+<div class="icon" data-hide-if="article.hidden">
+    <img src="regular.png" />
+</div>
+```
+
+The condition may be a function in the data (see the top of this page).
 
 ## Combining bindings
 
 An element can carry several binding attributes at once:
 
 ```html
-<li
-    data-iterate="item: cart.items"
-    data-render-if="item.available"
-    data-bind="item.label"
->
-    <span data-bind="item.price">0.00</span>
+<li data-iterate="item: cart.items" data-bind="item.label">
+    <span data-show-if="item.available" data-bind="item.price">0.00</span>
 </li>
 ```
+
+A condition on the loop container itself is evaluated against the data outside the loop. To
+test a property of each item, put the condition on an inner element, as above: it is then
+evaluated once per item.

@@ -14,7 +14,7 @@ standard, DOM-based engine.
 
 | Package | Description |
 |---------|-------------|
-| [`@temples/engine`](packages/engine) | The standalone `Renderer`: `data-bind` / `data-iterate` / `data-render-if`, partial real-time updates, serialization. |
+| [`@temples/engine`](packages/engine) | The standalone `Renderer`: `data-bind` / `data-iterate` / `data-render-if` / `data-show-if` / `data-hide-if`, partial real-time updates, serialization. |
 | [`@temples/components`](packages/components) | The `TemplesComponent` base class for declarative Web Components with reactive state. |
 | [`@temples/ssr`](packages/ssr) | Server-side rendering and static site generation, wired to linkedom. |
 | [`@temples/jquery`](packages/jquery) | The `$.fn.temples(data)` jQuery plugin (jQuery is a peer dependency). |

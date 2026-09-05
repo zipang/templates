@@ -88,7 +88,7 @@ export const prepare: PrepareFunction = (
 		const previous = installGlobals(extractDomGlobals(dom));
 
 		try {
-			const { Renderer } = await import("@temples/engine");
+			const { Renderer, stripPlaceholders } = await import("@temples/engine");
 
 			let componentClass: typeof TemplesComponent | undefined;
 
@@ -114,6 +114,8 @@ export const prepare: PrepareFunction = (
 			if (removeDataBindings && componentClass !== undefined) {
 				unwrapComponents(renderer.rootElt, componentClass);
 			}
+
+			stripPlaceholders(renderer.rootElt);
 
 			const style = componentStyles(templesComponents);
 

@@ -32,7 +32,7 @@ here is dogfood.
 
 - [Getting started](getting-started.html) — install the engine and render your first template.
 - [Data-binding syntax](binding-syntax.html) — the full reference of `data-bind`,
-  `data-iterate`, and `data-render-if`.
+  `data-iterate`, and the conditional bindings.
 - [API reference](api-reference.html) — every public class, method, and type.
 
 ## For AI coding agents

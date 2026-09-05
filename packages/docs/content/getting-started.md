@@ -96,6 +96,7 @@ component rendering.
 
 ## Next steps
 
-- [Data-binding syntax](binding-syntax.html) — `data-bind`, `data-iterate`, `data-render-if`.
+- [Data-binding syntax](binding-syntax.html) — `data-bind`, `data-iterate`, and the conditional
+  bindings.
 - [Components](components.html) — declarative Web Components with reactive state.
 - [API reference](api-reference.html) — every public class, method, and type.

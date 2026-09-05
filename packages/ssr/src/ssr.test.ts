@@ -241,7 +241,9 @@ describe("prepare a full page with components and the full binding range", () =>
 		expect(second).toContain("<h4>Changed Title</h4>");
 		expect(second).toContain("<span>June</span>");
 		expect(second).toContain('class="row popular"');
-		expect(second).toContain("display:none");
+		expect(second).not.toContain("The Sequel");
+		expect(second).not.toContain("display:none");
+		expect(second).not.toContain("Temples says:");
 		expect(second).not.toContain("Quiet!");
 		expect(second).not.toContain("My Temples Blog");
 		expect(second).not.toContain("/news");
@@ -250,12 +252,35 @@ describe("prepare a full page with components and the full binding range", () =>
 		const third = await render(storeEmpty);
 
 		expect(third).toContain("<h1>Empty Page</h1>");
-		expect(third).toContain("display:none");
+		expect(third).not.toContain("<h2");
 		expect(third).not.toContain("<blockquote");
 		expect(third).not.toContain("<a href=");
 		expect(third).not.toContain("Quiet!");
 		expect(third).not.toContain("Never give up!");
 		expect(third).not.toContain("June");
+	});
+
+	test("omits elements whose data-render-if condition is falsy", async () => {
+		const render = prepare("<section><p data-render-if='visible'>shown</p></section>");
+
+		expect(await render({ visible: false })).toBe("<section></section>");
+		expect(await render({ visible: true })).toBe("<section><p>shown</p></section>");
+	});
+
+	test("keeps data-show-if and data-hide-if elements with an inline display style", async () => {
+		const render = prepare(
+			"<section><p data-show-if='visible'>shown</p><q data-hide-if='muted'>muted</q></section>"
+		);
+
+		const html = await render({ visible: false, muted: true });
+
+		expect(html).toContain('<p style="display:none">shown</p>');
+		expect(html).toContain('<q style="display:none">muted</q>');
+
+		const shown = await render({ visible: true, muted: false });
+
+		expect(shown).toContain("<p>shown</p>");
+		expect(shown).toContain("<q>muted</q>");
 	});
 
 	test("keeps component tags when removeDataBindings is false", async () => {

@@ -49,8 +49,14 @@ throws a clear error.
 - `data-iterate` — loops: `data-iterate="quote: article.quotes"`. The first child is the row
   sub-template. Rows are reconciled by key (`data-key` or item `id`), so list edits preserve DOM
   identity, focus, and scroll. `data-each` and the `from` keyword are accepted variants.
-- `data-render-if` — conditionals: `data-render-if="article.featured"`. Function values in the
-  data are called and their return value is used.
+- `data-render-if` — presence conditional: `data-render-if="article.featured"`. A truthy
+  condition keeps the element in the DOM; a falsy condition removes it and a placeholder
+  comment holds its slot until the condition turns truthy again.
+- `data-show-if` — visibility conditional, same polarity: a truthy condition shows the element,
+  a falsy one hides it with `display:none`. The element stays in the DOM.
+- `data-hide-if` — the inverse of `data-show-if`: a truthy condition hides. Handy when the data
+  names the hiding state itself (`data-hide-if="article.hidden"`).
+- Function values in the data are called and their return value is used as the condition.
 
 ### Partial updates
 

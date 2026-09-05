@@ -403,24 +403,121 @@ describe("Renderer data-iterate", () => {
 });
 
 describe("Renderer data-render-if", () => {
-	test("shows the element when the condition is truthy", () => {
-		const renderer = new Renderer("<div data-render-if='article.featured'>star</div>");
+	test("renders the element when the condition is truthy", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'>star</div></section>"
+		);
 
 		renderer.render({ article: { featured: true } });
 
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("");
+		expect(renderer.rootElt.querySelector("div")?.textContent).toBe("star");
 	});
 
-	test("hides the element when the condition is falsy", () => {
-		const renderer = new Renderer("<div data-render-if='article.featured'>star</div>");
+	test("removes the element from the DOM when the condition is falsy", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'>star</div></section>"
+		);
 
 		renderer.render({ article: { featured: false } });
 
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("none");
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
+	});
+
+	test("re-inserts the element when the condition turns truthy again", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'>star</div></section>"
+		);
+
+		renderer.render({ article: { featured: false } });
+		renderer.render({ article: { featured: true } });
+
+		expect(renderer.rootElt.querySelector("div")?.textContent).toBe("star");
+
+		renderer.render({ article: { featured: false } });
+
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
+	});
+
+	test("marks the slot with a comment placeholder in the live tree", () => {
+		const renderer = new Renderer("<section><div data-render-if='show'>x</div></section>");
+
+		renderer.render({ show: false });
+
+		expect(renderer.rootElt.innerHTML).toContain("Temples says: show=false");
+	});
+
+	test("strips the placeholder from serialized output", () => {
+		const renderer = new Renderer("<section><div data-render-if='show'>x</div></section>");
+
+		renderer.render({ show: false });
+
+		expect(renderer.toHtml()).toBe("<section></section>");
+	});
+
+	test("keeps sibling bindings working across a removal and a partial re-render", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='featured'>x</div><p data-bind='text=message'></p></section>"
+		);
+
+		renderer.render({ featured: false, message: "first" });
+		renderer.render({ message: "second" });
+
+		expect(renderer.rootElt.querySelector("p")?.textContent).toBe("second");
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
+	});
+
+	test("keeps the element removed when the data does not mention the condition", () => {
+		const renderer = new Renderer("<section><div data-render-if='show'>x</div></section>");
+
+		renderer.render({ show: false });
+		renderer.render({ other: "x" });
+
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
+	});
+
+	test("renders child bindings when the element is present", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'><h1 data-bind='text=article.title'></h1></div></section>"
+		);
+
+		renderer.render({ article: { featured: true, title: "Hello" } });
+
+		expect(renderer.rootElt.querySelector("h1")?.textContent).toBe("Hello");
+	});
+
+	test("skips child bindings while the element is removed and resumes on return", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'><h1 data-bind='text=article.title'></h1></div></section>"
+		);
+
+		renderer.render({ article: { featured: false, title: "Hello" } });
+		renderer.render({ article: { featured: true, title: "Hello again" } });
+
+		expect(renderer.rootElt.querySelector("h1")?.textContent).toBe("Hello again");
+	});
+
+	test("restores nested conditionals independently", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='outer'><p data-render-if='inner'>x</p></div></section>"
+		);
+
+		renderer.render({ outer: false, inner: false });
+
+		expect(renderer.rootElt.querySelector("p")).toBeNull();
+
+		renderer.render({ inner: true });
+
+		expect(renderer.rootElt.querySelector("p")).toBeNull();
+
+		renderer.render({ outer: true, inner: true });
+
+		expect(renderer.rootElt.querySelector("p")?.textContent).toBe("x");
 	});
 
 	test("calls a function condition with its owner object as this", () => {
-		const renderer = new Renderer("<div data-render-if='article.popular'>popular</div>");
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.popular'>popular</div></section>"
+		);
 
 		renderer.render({
 			article: {
@@ -430,51 +527,238 @@ describe("Renderer data-render-if", () => {
 				}
 			}
 		});
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("");
+
+		expect(renderer.rootElt.querySelector("div")).not.toBeNull();
 
 		renderer.render({ article: { comments: [], popular: () => false } });
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("none");
+
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
+	});
+
+	test("throws when the conditional sits on the template root", () => {
+		expect(() => new Renderer("<div data-render-if='show'>x</div>")).toThrow();
+	});
+
+	test("removes the conditional attributes after construction", () => {
+		const renderer = new Renderer(
+			"<section><div data-render-if='show' data-hide-if='muted' data-bind='text=label'>x</div></section>"
+		);
+
+		const div = renderer.rootElt.querySelector("div");
+
+		expect(div?.hasAttribute("data-render-if")).toBe(false);
+		expect(div?.hasAttribute("data-hide-if")).toBe(false);
+	});
+});
+
+describe("Renderer data-show-if", () => {
+	test("hides the element with display:none while keeping it in the DOM", () => {
+		const renderer = new Renderer("<section><div data-show-if='visible'>star</div></section>");
+
+		renderer.render({ visible: false });
+
+		const div = renderer.rootElt.querySelector("div") as HTMLElement;
+
+		expect(div.style.display).toBe("none");
+		expect(renderer.rootElt.querySelector("div")).not.toBeNull();
+	});
+
+	test("shows the element when the condition is truthy", () => {
+		const renderer = new Renderer("<section><div data-show-if='visible'>star</div></section>");
+
+		renderer.render({ visible: true });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
 	});
 
 	test("flips visibility on re-render", () => {
-		const renderer = new Renderer("<div data-render-if='article.featured'>x</div>");
+		const renderer = new Renderer("<section><div data-show-if='visible'>x</div></section>");
 
-		renderer.render({ article: { featured: false } });
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("none");
+		renderer.render({ visible: false });
 
-		renderer.render({ article: { featured: true } });
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("");
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
 
-		renderer.render({ article: { featured: false } });
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("none");
+		renderer.render({ visible: true });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+
+		renderer.render({ visible: false });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
 	});
 
-	test("renders child bindings when shown", () => {
+	test("keeps the hidden element bound across sibling updates", () => {
 		const renderer = new Renderer(
-			"<div data-render-if='article.featured'><h1 data-bind='text=article.title'></h1></div>"
+			"<section><div data-show-if='visible'>x</div><p data-bind='text=message'></p></section>"
 		);
 
-		renderer.render({ article: { featured: true, title: "Hello" } });
+		renderer.render({ visible: false, message: "first" });
+		renderer.render({ message: "second" });
 
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("");
-		expect(renderer.rootElt.querySelector("h1")?.textContent).toBe("Hello");
+		expect(renderer.rootElt.querySelector("p")?.textContent).toBe("second");
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
 	});
 
-	test("combines with data-bind on the same element", () => {
+	test("calls a function condition with its owner object as this", () => {
+		const renderer = new Renderer("<section><div data-show-if='article.popular'>x</div></section>");
+
+		renderer.render({
+			article: {
+				comments: ["a", "b", "c"],
+				popular() {
+					return (this.comments as string[]).length > 2;
+				}
+			}
+		});
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+
+		renderer.render({ article: { comments: [], popular: () => false } });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
+	});
+
+	test("shows an element authored display:none when the condition is truthy", () => {
 		const renderer = new Renderer(
-			"<div data-render-if='article.featured' data-bind='text=article.title'>x</div>"
+			"<section><div data-show-if='visible' style='display:none'>x</div></section>"
 		);
 
-		renderer.render({ article: { featured: true, title: "Hi" } });
+		renderer.render({ visible: true });
 
-		expect(renderer.rootElt.textContent).toBe("Hi");
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("");
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+	});
+});
+
+describe("Renderer data-hide-if", () => {
+	test("hides the element with display:none while keeping it in the DOM", () => {
+		const renderer = new Renderer(
+			"<section><div data-hide-if='article.hidden'>star</div></section>"
+		);
+
+		renderer.render({ article: { hidden: true } });
+
+		const div = renderer.rootElt.querySelector("div") as HTMLElement;
+
+		expect(div.style.display).toBe("none");
+		expect(renderer.rootElt.querySelector("div")).not.toBeNull();
 	});
 
-	test("removes the data-render-if attribute after construction", () => {
-		const renderer = new Renderer("<div data-render-if='article.featured'>x</div>");
+	test("shows the element when the condition is falsy", () => {
+		const renderer = new Renderer(
+			"<section><div data-hide-if='article.hidden'>star</div></section>"
+		);
 
-		expect(renderer.rootElt.hasAttribute("data-render-if")).toBe(false);
+		renderer.render({ article: { hidden: false } });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+	});
+
+	test("flips visibility on re-render", () => {
+		const renderer = new Renderer("<section><div data-hide-if='hidden'>x</div></section>");
+
+		renderer.render({ hidden: true });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
+
+		renderer.render({ hidden: false });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+
+		renderer.render({ hidden: true });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
+	});
+
+	test("keeps the hidden element bound across sibling updates", () => {
+		const renderer = new Renderer(
+			"<section><div data-hide-if='muted'>x</div><p data-bind='text=message'></p></section>"
+		);
+
+		renderer.render({ muted: true, message: "first" });
+		renderer.render({ message: "second" });
+
+		expect(renderer.rootElt.querySelector("p")?.textContent).toBe("second");
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
+	});
+
+	test("calls a function condition with its owner object as this", () => {
+		const renderer = new Renderer("<section><div data-hide-if='article.muted'>x</div></section>");
+
+		renderer.render({
+			article: {
+				comments: [],
+				muted() {
+					return (this.comments as string[]).length === 0;
+				}
+			}
+		});
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("none");
+
+		renderer.render({ article: { comments: ["a"], muted: () => false } });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+	});
+
+	test("shows an element authored display:none when the condition is falsy", () => {
+		const renderer = new Renderer(
+			"<section><div data-hide-if='hidden' style='display:none'>x</div></section>"
+		);
+
+		renderer.render({ hidden: false });
+
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
+	});
+});
+
+describe("Renderer conditionals in loops", () => {
+	test("evaluates a conditional inside the loop template per item", () => {
+		const renderer = new Renderer(
+			"<ul data-iterate='item: cart.items'><li><span data-render-if='item.ok' data-bind='text=item.label'></span></li></ul>"
+		);
+
+		renderer.render({
+			cart: {
+				items: [
+					{ ok: true, label: "A" },
+					{ ok: false, label: "B" }
+				]
+			}
+		});
+
+		const items = renderer.rootElt.querySelectorAll("li");
+
+		expect(items.length).toBe(2);
+		expect(items[0]?.querySelector("span")?.textContent).toBe("A");
+		expect(items[1]?.querySelector("span")).toBeNull();
+	});
+
+	test("re-evaluates row conditionals when the collection changes", () => {
+		const renderer = new Renderer(
+			"<ul data-iterate='item: cart.items'><li><span data-render-if='item.ok' data-bind='text=item.label'></span></li></ul>"
+		);
+
+		renderer.render({ cart: { items: [{ ok: false, label: "A" }] } });
+
+		expect(renderer.rootElt.querySelector("span")).toBeNull();
+
+		renderer.render({ cart: { items: [{ ok: true, label: "A" }] } });
+
+		expect(renderer.rootElt.querySelector("span")?.textContent).toBe("A");
+	});
+
+	test("hides the whole list through a conditional on the loop container", () => {
+		const renderer = new Renderer(
+			"<section><ul data-iterate='item: cart.items' data-render-if='cart.visible'><li data-bind='item'></li></ul></section>"
+		);
+
+		renderer.render({ cart: { visible: false, items: ["A"] } });
+
+		expect(renderer.rootElt.querySelector("ul")).toBeNull();
+
+		renderer.render({ cart: { visible: true, items: ["A", "B"] } });
+
+		expect(renderer.rootElt.querySelectorAll("li").length).toBe(2);
 	});
 });
 
@@ -526,12 +810,14 @@ describe("Renderer partial render", () => {
 	});
 
 	test("re-evaluates a render-if when its condition path is in the data", () => {
-		const renderer = new Renderer("<div data-render-if='article.featured'>x</div>");
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'>x</div></section>"
+		);
 
 		renderer.render({ article: { featured: true } });
 		renderer.render({ article: { featured: false } });
 
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("none");
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
 	});
 
 	test("does not interpret a flat dotted key as a nested path", () => {
@@ -571,12 +857,14 @@ describe("Renderer update", () => {
 	});
 
 	test("re-evaluates a render-if when its condition path is updated", () => {
-		const renderer = new Renderer("<div data-render-if='article.featured'>x</div>");
+		const renderer = new Renderer(
+			"<section><div data-render-if='article.featured'>x</div></section>"
+		);
 
 		renderer.render({ article: { featured: true } });
 		renderer.update("article.featured", false);
 
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("none");
+		expect(renderer.rootElt.querySelector("div")).toBeNull();
 	});
 
 	test("update returns the root element", () => {
@@ -755,12 +1043,14 @@ describe("Renderer engine correctness fixes (T7)", () => {
 		expect(items[1]?.textContent).toBe("warn");
 	});
 
-	test("shows an element authored display:none when the condition is truthy", () => {
-		const renderer = new Renderer("<div data-render-if='show' style='display:none'>x</div>");
+	test("shows an element authored display:none when the hide condition is falsy", () => {
+		const renderer = new Renderer(
+			"<section><div data-hide-if='hidden' style='display:none'>x</div></section>"
+		);
 
-		renderer.render({ show: true });
+		renderer.render({ hidden: false });
 
-		expect((renderer.rootElt as HTMLElement).style.display).toBe("");
+		expect((renderer.rootElt.querySelector("div") as HTMLElement).style.display).toBe("");
 	});
 
 	test("clears a binding when the value is null", () => {
