@@ -30,7 +30,10 @@ interface PageMeta extends Record<string, string> {
 	slug: string;
 	title: string;
 	description: string;
+	/** URL of the rendered page, relative to the site root. */
 	url: string;
+	/** URL of the raw markdown export, relative to the site root. */
+	markdownUrl: string;
 }
 
 /**
@@ -104,6 +107,8 @@ const loadPages = async (): Promise<PageSource[]> => {
 /**
  * Build the llms.txt index consumed by AI coding agents.
  *
+ * Each page links to its raw markdown export: agents read markdown, not HTML.
+ *
  * @param pages - The metadata of every built page.
  * @returns The llms.txt content.
  */
@@ -119,7 +124,7 @@ const buildLlmsTxt = (pages: PageMeta[]): string => {
 
 	for (const page of pages) {
 		const description = page.description === "" ? page.title : page.description;
-		lines.push(`- [${page.title}](${BASE_URL}/${page.url}): ${description}`);
+		lines.push(`- [${page.title}](${BASE_URL}/${page.markdownUrl}): ${description}`);
 	}
 
 	lines.push("", `Sources: https://github.com/zipang/Temples`, "");
@@ -131,9 +136,11 @@ const buildLlmsTxt = (pages: PageMeta[]): string => {
  * Build the static documentation site into `dist/`.
  *
  * Every markdown page is converted to HTML, rendered through the Temples
- * layout with `@temples/ssr`, and written as `<slug>.html`. The stylesheet
- * and an `llms.txt` agent index are emitted alongside. Pages with
- * `hidden: true` are built but excluded from the navigation and `llms.txt`.
+ * layout with `@temples/ssr`, and written as `<slug>.html`. Its raw markdown
+ * source is copied next to it as `<slug>.md`, for agents reading plain text.
+ * The stylesheet and an `llms.txt` agent index are emitted alongside; the
+ * index references the markdown exports. Pages with `hidden: true` are built
+ * but excluded from the navigation, the markdown exports, and `llms.txt`.
  *
  * @returns The metadata of every built page.
  */
@@ -145,7 +152,8 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 			slug: page.slug,
 			title: page.title,
 			description: page.description,
-			url: `${page.slug}.html`
+			url: `${page.slug}.html`,
+			markdownUrl: `${page.slug}.md`
 		}));
 
 	const layout = await Bun.file(`${DOCS_DIR}/layout.html`).text();
@@ -165,6 +173,13 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 		});
 
 		await Bun.write(`${DIST_DIR}/${source.slug}.html`, html);
+
+		if (!source.hidden) {
+			await Bun.write(
+				`${DIST_DIR}/${source.slug}.md`,
+				Bun.file(`${CONTENT_DIR}/${source.slug}.md`)
+			);
+		}
 	}
 
 	await Bun.write(`${DIST_DIR}/llms.txt`, buildLlmsTxt(metas));

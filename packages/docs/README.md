@@ -8,8 +8,9 @@ The documentation site of the Temples packages — built **with Temples itself**
 content/*.md  ──Bun.markdown──▶  HTML fragments
                                      │
 layout.html  ──@temples/ssr prepare()─▶  dist/<slug>.html  +  dist/assets/style.css
+content/*.md  ──raw copy─────────────▶  dist/<slug>.md  (plain-text counterpart)
                                      │
-                                     └──▶  dist/llms.txt  (agent index)
+                                     └──▶  dist/llms.txt  (agent index, links the .md files)
 ```
 
 - `content/*.md` — one file per page. The front-matter block carries `title`, `description`,
@@ -21,7 +22,7 @@ layout.html  ──@temples/ssr prepare()─▶  dist/<slug>.html  +  dist/asset
 - `src/markdown.ts` — the only module that touches `Bun.markdown` (an unstable Bun API), so a
   parser swap stays a one-file change.
 - `src/build.ts` — the pipeline. `buildSite()` is exported for tests; the script runs it when
-  executed directly.
+  executed directly. It copies every visible page as raw markdown next to its HTML file.
 - `src/serve.ts` — serves `dist/` with a Bun file route for the root, and a `fetch` handler
   for every other path. When the path does not name a file in `dist/`, the handler serves
   `404.html` with status 404.
@@ -45,4 +46,5 @@ and `bun install && bun run docs:build` as the build command.
 - **Vercel / Netlify / Cloudflare Pages** — create a project pointed at this repository with:
   - build command: `bun install && bun run docs:build`
   - output directory: `packages/docs/dist`
-- **LLM agents** — the build emits `dist/llms.txt`, an index of every page with absolute URLs.
+- **LLM agents** — the build emits `dist/llms.txt`, an index of every page with absolute links
+  to its raw markdown (`<slug>.md`), so agents fetch plain text instead of HTML.

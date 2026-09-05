@@ -38,4 +38,22 @@ describe("docs build", () => {
 		expect(index).not.toContain('href="404.html"');
 		expect(llms).not.toContain("404");
 	});
+
+	test("exports each visible page as raw markdown, referenced by llms.txt", async () => {
+		await buildSite();
+
+		const markdown = await Bun.file(`${import.meta.dir}/../dist/getting-started.md`).text();
+
+		expect(markdown).toContain("title: Getting started");
+		expect(markdown).toContain("# Getting started");
+
+		const llms = await Bun.file(`${import.meta.dir}/../dist/llms.txt`).text();
+
+		expect(llms).toContain("(https://zipang.github.io/Temples/getting-started.md)");
+		expect(llms).not.toContain(".html");
+
+		const notFoundMarkdown = Bun.file(`${import.meta.dir}/../dist/404.md`);
+
+		expect(await notFoundMarkdown.exists()).toBe(false);
+	});
 });
