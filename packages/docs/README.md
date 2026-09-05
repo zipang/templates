@@ -18,7 +18,10 @@ content/*.md  ──raw copy─────────────▶  dist/<sl
   navigation and `llms.txt`.
 - `content/404.md` — the 404 error page, kept out of the navigation by `hidden: true`.
 - `layout.html` — a Temples template: the nav iterates `site.pages` (`data-iterate`), the page
-  body is injected with `data-bind="html=page.content"`.
+  body is injected with `data-bind="html=page.content"`. The head declares the markdown export
+  of the page with `<link rel="alternate" type="text/markdown">`, kept only while
+  `data-render-if="page.markdownUrl"` is truthy — hidden pages carry an empty `markdownUrl`,
+  so they emit no link.
 - `src/markdown.ts` — the only module that touches `Bun.markdown` (an unstable Bun API), so a
   parser swap stays a one-file change.
 - `src/build.ts` — the pipeline. `buildSite()` is exported for tests; the script runs it when

@@ -10,10 +10,10 @@ const DOCS_DIR = resolve(import.meta.dir, "..");
 const BASE_URL = "https://zipang.github.io/Temples";
 
 /** The directory holding the markdown sources. */
-const CONTENT_DIR = `${DOCS_DIR}/content`;
+const CONTENT_DIR = resolve(DOCS_DIR, "content");
 
 /** The directory receiving the built site. */
-const DIST_DIR = `${DOCS_DIR}/dist`;
+const DIST_DIR = resolve(DOCS_DIR, "dist");
 
 /** Front-matter and body of one markdown source file. */
 interface PageSource {
@@ -83,7 +83,7 @@ const loadPages = async (): Promise<PageSource[]> => {
 
 	const pages = await Promise.all(
 		slugs.map(async (slug): Promise<PageSource> => {
-			const raw = await Bun.file(`${CONTENT_DIR}/${slug}.md`).text();
+			const raw = await Bun.file(resolve(CONTENT_DIR, `${slug}.md`)).text();
 			const { fields, body } = parseFrontMatter(raw, slug);
 
 			if (fields.title === undefined || fields.title === "") {
@@ -156,11 +156,15 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 			markdownUrl: `${page.slug}.md`
 		}));
 
-	const layout = await Bun.file(`${DOCS_DIR}/layout.html`).text();
+	const layout = await Bun.file(resolve(DOCS_DIR, "layout.html")).text();
 	const renderLayout = prepare(layout, { removeDataBindings: false });
 
 	await mkdir(DIST_DIR, { recursive: true });
-	await Bun.write(`${DIST_DIR}/assets/style.css`, Bun.file(`${DOCS_DIR}/assets/style.css`));
+
+	await Bun.write(
+		resolve(DIST_DIR, "assets", "style.css"),
+		Bun.file(resolve(DOCS_DIR, "assets", "style.css"))
+	);
 
 	for (const source of sources) {
 		const html = await renderLayout({
@@ -168,21 +172,22 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 			page: {
 				title: source.title,
 				description: source.description,
-				content: markdownToHtml(source.markdown)
+				content: markdownToHtml(source.markdown),
+				markdownUrl: source.hidden ? "" : `${source.slug}.md`
 			}
 		});
 
-		await Bun.write(`${DIST_DIR}/${source.slug}.html`, html);
+		await Bun.write(resolve(DIST_DIR, `${source.slug}.html`), html);
 
 		if (!source.hidden) {
 			await Bun.write(
-				`${DIST_DIR}/${source.slug}.md`,
-				Bun.file(`${CONTENT_DIR}/${source.slug}.md`)
+				resolve(DIST_DIR, `${source.slug}.md`),
+				Bun.file(resolve(CONTENT_DIR, `${source.slug}.md`))
 			);
 		}
 	}
 
-	await Bun.write(`${DIST_DIR}/llms.txt`, buildLlmsTxt(metas));
+	await Bun.write(resolve(DIST_DIR, "llms.txt"), buildLlmsTxt(metas));
 
 	return metas;
 };
