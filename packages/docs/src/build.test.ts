@@ -61,6 +61,14 @@ describe("docs build", () => {
 		expect(await notFoundMarkdown.exists()).toBe(false);
 	});
 
+	test("declares the llms.txt index as a describedby link", async () => {
+		await buildSite();
+
+		const page = await Bun.file(resolve(distDir, "getting-started.html")).text();
+
+		expect(page).toContain('<link rel="describedby" href="llms.txt">');
+	});
+
 	test("declares the markdown export as an alternate link in each visible page", async () => {
 		await buildSite();
 

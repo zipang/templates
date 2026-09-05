@@ -21,7 +21,8 @@ content/*.md  ──raw copy─────────────▶  dist/<sl
   body is injected with `data-bind="html=page.content"`. The head declares the markdown export
   of the page with `<link rel="alternate" type="text/markdown">`, kept only while
   `data-render-if="page.markdownUrl"` is truthy — hidden pages carry an empty `markdownUrl`,
-  so they emit no link.
+  so they emit no link. It also declares `<link rel="describedby" href="llms.txt">`, the agent
+  index covering the site, as recommended by [llmstxt.org](https://llmstxt.org/).
 - `src/markdown.ts` — the only module that touches `Bun.markdown` (an unstable Bun API), so a
   parser swap stays a one-file change.
 - `src/build.ts` — the pipeline. `buildSite()` is exported for tests; the script runs it when
