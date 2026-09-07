@@ -78,6 +78,21 @@ export interface DefineOptions {
 }
 ```
 
+The state is initialized through the constructor:
+
+```typescript
+readonly state: Record<string, unknown>;
+
+constructor(state: Record<string, unknown> = {});
+```
+
+- `super({ ... })` in the subclass constructor is the one way to initialize the state.
+- `state` is defined non-writable and non-configurable by the constructor. A subclass that
+  redeclares it with `override state = ...` breaks at construction with a `TypeError`. Mutating
+  the state properties (`this.state.items = [...]`) stays valid.
+- The platform creates custom elements with no constructor arguments, so the default `{}` applies
+  and `connectedCallback` seeds the state from the attributes and the global store.
+
 Behavior:
 
 - `define()` sets `ctor.attributeTypes = options.attributes` and
@@ -137,6 +152,8 @@ const applyAttributes = (ctor: typeof TemplesComponent, attributes: Record<strin
   `state` with coercion (`"string" | "boolean" | "number" | "json"`) and re-render on
   `attributeChangedCallback`.
 - `define()` throws on a double definition, even when the values match.
+- The state is initialized only through `super({ ... })`. A subclass that writes
+  `override state = ...` breaks at construction with a `TypeError`.
 - Every component test registers through the three-argument form.
 - The example app declares no attribute statics.
 - The docs show one declaration form and document `attributes`.
@@ -147,6 +164,9 @@ const applyAttributes = (ctor: typeof TemplesComponent, attributes: Record<strin
 - Removing the class-form overload from code (SSR registers through it).
 - Guards for `events`, `css`, or `template` statics. They keep today's coexistence semantics:
   an option overrides the static when both are present.
+- Typed state through class generics (`TemplesComponent<S>`). The state stays
+  `Record<string, unknown>`. A future ticket owns the generic design, the component-class type
+  it requires, and the SSR signature updates.
 - Shadow DOM, SSR behavior changes, new docs pages.
 
 ## Open Questions

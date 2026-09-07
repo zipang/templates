@@ -74,19 +74,36 @@ The Task List section is the markdown TODO list — one checkbox per task:
 - [x] Example works in the browser
 - [x] Docs build and show one declaration form
 
-### Phase 3: Gate
+### Phase 3: State initialization
 
-- [x] **Task 5: Full verification + commit preparation**
+- [x] **Task 6: State initialization through the constructor**
+  - Acceptance: `state` is a `readonly` field initialized by a
+    `constructor(state = {})` that subclasses reach with `super({ ... })`. A test proves the
+    constructor seeding and the rendering. Every `override state = ...` site is migrated to
+    `super({ ... })`: the component tests, the SSR tests, the example components, and every docs
+    snippet. The constructor defines `state` non-writable and non-configurable, so the old
+    field-initializer form breaks at construction with a `TypeError`.
+  - Verify: `bun test packages/components && bun test packages/ssr`, then the full gate
+    (`bun run check && bun run typecheck && bun test && bun run build:docs`)
+  - Files: `packages/components/src/component.ts`, `packages/components/src/component.test.ts`,
+    `packages/ssr/src/ssr.test.ts`, `example/components/*/index.ts`,
+    `packages/components/README.md`, `packages/docs/content/components.md`,
+    `packages/docs/content/api-reference.md`
+  - Depends: Task 1
+
+### Phase 4: Gate
+
+- [ ] **Task 5b: Full verification + commit preparation**
   - Acceptance: the full gate passes. Every docs snippet matches the implementation. The spec
     and the plan stay accurate.
   - Verify: `bun run check && bun run typecheck && bun test && bun run build:docs`
   - Files: none expected
-  - Depends: Tasks 2, 3, 4
+  - Depends: Tasks 2, 3, 4, 6
 
 ### Checkpoint: Complete
 
 - [x] All acceptance criteria met
-- [ ] Ticket committed, ready for implementation
+- [x] Ticket committed, ready for implementation
 
 ## Risks and Mitigations
 
