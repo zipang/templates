@@ -1,4 +1,4 @@
-import type { TemplesComponent } from "@temples/components";
+import type { TemplesComponentClass } from "@temples/components";
 import type { TemplesData } from "@temples/engine";
 import { parseHTML } from "linkedom";
 import { extractDomGlobals, installGlobals, restoreGlobals } from "./utilities/dom-globals";
@@ -41,7 +41,7 @@ export interface PrepareOptions {
 	 * The `TemplesComponent` classes used by the template. `prepare` registers
 	 * each class so its custom tag renders through the component engine.
 	 */
-	templesComponents?: (typeof TemplesComponent)[];
+	templesComponents?: TemplesComponentClass[];
 }
 
 /**
@@ -90,7 +90,7 @@ export const prepare: PrepareFunction = (
 		try {
 			const { Renderer, stripPlaceholders } = await import("@temples/engine");
 
-			let componentClass: typeof TemplesComponent | undefined;
+			let componentClass: TemplesComponentClass | undefined;
 
 			if (templesComponents.length > 0) {
 				({ TemplesComponent: componentClass } = await import("@temples/components"));
@@ -175,7 +175,7 @@ const assertSingleRoot = (source: string): void => {
  * @param components - The component classes used by the template.
  * @returns The concatenated stylesheet, or an empty string.
  */
-const componentStyles = (components: readonly (typeof TemplesComponent)[]): string =>
+const componentStyles = (components: readonly TemplesComponentClass[]): string =>
 	components
 		.map((component) => component.css)
 		.filter(Boolean)
@@ -191,7 +191,7 @@ const componentStyles = (components: readonly (typeof TemplesComponent)[]): stri
  * @param root - The subtree root to unwrap.
  * @param componentClass - The component class used to detect instances.
  */
-const unwrapComponents = (root: Element, componentClass: typeof TemplesComponent): void => {
+const unwrapComponents = (root: Element, componentClass: TemplesComponentClass): void => {
 	const instances = [root, ...Array.from(root.querySelectorAll("*"))].filter(
 		(element) => element instanceof componentClass
 	);
