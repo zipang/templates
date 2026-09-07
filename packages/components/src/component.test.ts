@@ -312,6 +312,87 @@ describe("TemplesComponent.define", () => {
 		fromStore.remove();
 		explicit.remove();
 	});
+
+	test("define(tagName, componentClass, options) derives the observed attributes from the attributes map", () => {
+		class Card extends TemplesComponent {
+			override state = { title: "", hidden: false };
+		}
+
+		TemplesComponent.define("attrs-derive", Card, {
+			template: "<p data-bind='text=title'>?</p>",
+			attributes: { title: "string", hidden: "boolean" }
+		});
+
+		expect(Card.observedAttributes).toEqual(["title", "hidden"]);
+		expect(Card.attributeTypes).toEqual({ title: "string", hidden: "boolean" });
+
+		const elt = document.createElement("attrs-derive") as Card;
+
+		elt.setAttribute("title", "Hello");
+		elt.setAttribute("hidden", "true");
+		document.body.appendChild(elt);
+
+		expect(elt.state.title).toBe("Hello");
+		expect(elt.state.hidden).toBe(true);
+		expect(elt.querySelector("p")?.textContent).toBe("Hello");
+		elt.remove();
+	});
+
+	test("define(tagName, componentClass, options) coerces every attribute type in the attributes map", () => {
+		class Meter extends TemplesComponent {
+			override state = { count: 0, done: false, meta: null as unknown, label: "" };
+		}
+
+		TemplesComponent.define("attrs-coerce", Meter, {
+			template: "<p data-bind='text=count'>0</p>",
+			attributes: { count: "number", done: "boolean", meta: "json", label: "string" }
+		});
+
+		const elt = document.createElement("attrs-coerce") as Meter;
+
+		elt.setAttribute("count", "3");
+		elt.setAttribute("done", "false");
+		elt.setAttribute("meta", '{"a":1}');
+		elt.setAttribute("label", "Hi");
+		document.body.appendChild(elt);
+
+		expect(elt.state.count).toBe(3);
+		expect(elt.state.done).toBe(false);
+		expect(elt.state.meta).toEqual({ a: 1 });
+		expect(elt.state.label).toBe("Hi");
+
+		elt.setAttribute("count", "5");
+
+		expect(elt.state.count).toBe(5);
+		expect(elt.querySelector("p")?.textContent).toBe("5");
+		elt.remove();
+	});
+
+	test("define(tagName, componentClass, options) rejects a class that declares attribute statics", () => {
+		class Card extends TemplesComponent {
+			static override observedAttributes = ["title"];
+			override state = { title: "" };
+		}
+
+		expect(() =>
+			TemplesComponent.define("attrs-conflict-observed", Card, {
+				template: "<p>?</p>",
+				attributes: { title: "string" }
+			})
+		).toThrow("declares attributes on static fields");
+
+		class Badge extends TemplesComponent {
+			static override attributeTypes: Record<string, AttributeType> = { level: "number" };
+			override state = { level: 0 };
+		}
+
+		expect(() =>
+			TemplesComponent.define("attrs-conflict-types", Badge, {
+				template: "<p>?</p>",
+				attributes: { level: "number" }
+			})
+		).toThrow("declares attributes on static fields");
+	});
 });
 
 describe("TemplesComponent events", () => {

@@ -46,6 +46,16 @@ export interface DefineOptions {
 	template: string;
 
 	/**
+	 * Declarative attribute map, `"name": type`.
+	 *
+	 * Each key names an observed attribute that flows into `state`, coerced by
+	 * its `AttributeType`. `define()` derives the class `observedAttributes`
+	 * and `attributeTypes` statics from this map, which is the single source of
+	 * truth: a class that also declares those statics makes `define()` throw.
+	 */
+	attributes?: Record<string, AttributeType>;
+
+	/**
 	 * Optional declarative event map, mapping a binding to a handler method name.
 	 */
 	events?: EventMap;
@@ -56,8 +66,8 @@ export interface DefineOptions {
 	css?: string;
 
 	/**
-	 * The global data store shared by every component. It seeds observed
-	 * attributes that are absent on the tag.
+	 * The global data store shared by every component.
+	 * It seeds observed attributes that are absent on the tag.
 	 */
 	globalStore?: TemplesData;
 }
@@ -115,10 +125,13 @@ const dispatchMessage = (type: string, detail: unknown): void => {
 /**
  * Base class for declarative Web Components with reactive state.
  *
- * A subclass declares its `tag`, `template`, and optional `events`,
- * `observedAttributes`, and `attributeTypes` as static fields. `define()`
- * parses the template once and registers the custom element. On connection the
- * state is rendered from the template, and any state mutation re-renders.
+ * Declare a component with `TemplesComponent.define(tagName, componentClass,
+ * options)`: the options carry the `template`, the `attributes` map, the
+ * `events`, the `css`, and the `globalStore`, while the class carries its
+ * `state` and handler methods. `define()` parses the template once, derives
+ * the `observedAttributes` and `attributeTypes` statics from the `attributes`
+ * map, and registers the custom element. On connection the state is rendered
+ * from the template, and any state mutation re-renders.
  */
 export class TemplesComponent extends HTMLElement {
 	/**
@@ -214,15 +227,18 @@ export class TemplesComponent extends HTMLElement {
 	/**
 	 * Register the custom element with an explicit tag, class, and options.
 	 *
-	 * This is the canonical way to declare a component: the class carries its
-	 * `observedAttributes`, `attributeTypes`, `state`, and `events`, while the
-	 * tag name, template, and stylesheet are passed here. The options are copied
-	 * onto the class's static fields so server-side rendering can read them.
+	 * This is the canonical way to declare a component: the options carry the
+	 * template, the `attributes` map, the events, the stylesheet, and the
+	 * global store, while the class carries its `state` and handler methods.
+	 * The `attributes` map derives the class `observedAttributes` and
+	 * `attributeTypes` statics so the platform observes the declared names.
+	 * The options are copied onto the class's static fields so server-side
+	 * rendering can read them.
 	 *
 	 * @param tagName - The custom element tag name (must contain a hyphen).
 	 * @param componentClass - The class extending `TemplesComponent`.
-	 * @param options - The template (required) and optional events, css, and
-	 * global store.
+	 * @param options - The template (required), the optional `attributes` map,
+	 * events, css, and global store.
 	 */
 	static define(
 		tagName: string,
@@ -245,6 +261,12 @@ export class TemplesComponent extends HTMLElement {
 			ctor.tag = tagNameOrOptions;
 			ctor.template = options?.template ?? "";
 
+			if (options?.attributes !== undefined) {
+				TemplesComponent.assertNoStaticAttributes(tagNameOrOptions, ctor);
+				ctor.attributeTypes = options.attributes;
+				ctor.observedAttributes = Object.keys(options.attributes);
+			}
+
 			if (options?.events !== undefined) {
 				ctor.events = options.events;
 			}
@@ -261,6 +283,28 @@ export class TemplesComponent extends HTMLElement {
 		TemplesComponent.resolveTemplate(ctor);
 		TemplesComponent.registerEventTypes(ctor);
 		customElements.define(ctor.tag, ctor);
+	}
+
+	/**
+	 * Reject a component that declares its attributes twice.
+	 *
+	 * The `attributes` option is the single source of truth for the observed
+	 * attributes and their coercion types. A class that also declares its own
+	 * `observedAttributes` or `attributeTypes` statics carries two competing
+	 * sources, so `define()` refuses the registration.
+	 *
+	 * @param tagName - The custom element tag name, quoted in the error message.
+	 * @param ctor - The component class to check.
+	 */
+	private static assertNoStaticAttributes(tagName: string, ctor: typeof TemplesComponent): void {
+		const hasOwnObserved = Object.hasOwn(ctor, "observedAttributes");
+		const hasOwnTypes = Object.hasOwn(ctor, "attributeTypes");
+
+		if (hasOwnObserved || hasOwnTypes) {
+			throw new Error(
+				`Component "${tagName}" declares attributes on static fields and in define() options. Remove the static declaration and pass { attributes } to define().`
+			);
+		}
 	}
 
 	/**
