@@ -31,7 +31,9 @@ describe("TemplesComponent.define", () => {
 
 	test("renders from state and re-renders on a state mutation", () => {
 		class Greeter extends TemplesComponent {
-			override state = { title: "Hello" };
+			constructor() {
+				super({ title: "Hello" });
+			}
 		}
 
 		TemplesComponent.define("greeter-render", Greeter, {
@@ -49,11 +51,13 @@ describe("TemplesComponent.define", () => {
 		elt.remove();
 	});
 
-	test("wraps a plain state object into a reactive proxy on connect", () => {
+	test("wraps the initial state into a reactive proxy at construction", () => {
 		let changes = 0;
 
 		class Counter extends TemplesComponent {
-			override state = { count: 0 };
+			constructor() {
+				super({ count: 0 });
+			}
 		}
 
 		TemplesComponent.define("counter-autowrap", Counter, {
@@ -76,7 +80,9 @@ describe("TemplesComponent.define", () => {
 
 	test("re-renders on a nested state mutation", () => {
 		class Profile extends TemplesComponent {
-			override state = { user: { name: "Jane" } };
+			constructor() {
+				super({ user: { name: "Jane" } });
+			}
 		}
 
 		TemplesComponent.define("profile-card", Profile, {
@@ -88,7 +94,8 @@ describe("TemplesComponent.define", () => {
 
 		expect(elt.querySelector("span")?.textContent).toBe("Jane");
 
-		elt.state.user.name = "Jane Eyre";
+		const user = elt.state.user as { name: string };
+		user.name = "Jane Eyre";
 
 		expect(elt.querySelector("span")?.textContent).toBe("Jane Eyre");
 		elt.remove();
@@ -96,7 +103,9 @@ describe("TemplesComponent.define", () => {
 
 	test("coerces attributes declared in the attributes map into state and re-renders", () => {
 		class Meter extends TemplesComponent {
-			override state = { count: 0, done: false };
+			constructor() {
+				super({ count: 0, done: false });
+			}
 		}
 
 		TemplesComponent.define("meter-card", Meter, {
@@ -123,7 +132,9 @@ describe("TemplesComponent.define", () => {
 
 	test("maps a falsey boolean attribute to false", () => {
 		class Flag extends TemplesComponent {
-			override state = { done: true };
+			constructor() {
+				super({ done: true });
+			}
 		}
 
 		TemplesComponent.define("flag-card", Flag, {
@@ -142,7 +153,9 @@ describe("TemplesComponent.define", () => {
 
 	test("removing an observed attribute resets the coerced state", () => {
 		class Meter extends TemplesComponent {
-			override state = { count: 0 };
+			constructor() {
+				super({ count: 0 });
+			}
 		}
 
 		TemplesComponent.define("meter-remove", Meter, {
@@ -164,7 +177,9 @@ describe("TemplesComponent.define", () => {
 
 	test("disconnectedCallback cleans up the children", () => {
 		class Greeter extends TemplesComponent {
-			override state = { title: "Hi" };
+			constructor() {
+				super({ title: "Hi" });
+			}
 		}
 
 		TemplesComponent.define("greeter-cleanup", Greeter, {
@@ -183,7 +198,9 @@ describe("TemplesComponent.define", () => {
 
 	test("composed components re-render when the parent state changes", () => {
 		class TodoItem extends TemplesComponent {
-			override state = { label: "" };
+			constructor() {
+				super({ label: "" });
+			}
 		}
 
 		TemplesComponent.define("todo-item", TodoItem, {
@@ -192,7 +209,9 @@ describe("TemplesComponent.define", () => {
 		});
 
 		class TodoList extends TemplesComponent {
-			override state = { items: [{ label: "A" }, { label: "B" }] };
+			constructor() {
+				super({ items: [{ label: "A" }, { label: "B" }] });
+			}
 		}
 
 		TemplesComponent.define("todo-list", TodoList, {
@@ -205,12 +224,13 @@ describe("TemplesComponent.define", () => {
 
 		expect(list.querySelectorAll("todo-item").length).toBe(2);
 
-		list.state.items.push({ label: "C" });
+		const items = list.state.items as Array<{ label: string }>;
+		items.push({ label: "C" });
 
 		expect(list.querySelectorAll("todo-item").length).toBe(3);
 		expect(list.querySelectorAll("todo-item")[2]?.textContent).toBe("C");
 
-		const firstItem = list.state.items[0];
+		const firstItem = items[0];
 
 		if (firstItem !== undefined) firstItem.label = "A1";
 
@@ -222,7 +242,9 @@ describe("TemplesComponent.define", () => {
 		const clicks: string[] = [];
 
 		class Counter extends TemplesComponent {
-			override state = { label: "" };
+			constructor() {
+				super({ label: "" });
+			}
 
 			onClick(): void {
 				clicks.push("clicked");
@@ -258,7 +280,10 @@ describe("TemplesComponent.define", () => {
 
 		class Counter extends TemplesComponent {
 			static override events = { "click .inc": "onInc" };
-			override state = { count: 0 };
+
+			constructor() {
+				super({ count: 0 });
+			}
 
 			onInc(): void {
 				hits.push(this);
@@ -280,7 +305,9 @@ describe("TemplesComponent.define", () => {
 
 	test("define(tagName, componentClass, options) lets an explicit attribute override the store", () => {
 		class Greeter extends TemplesComponent {
-			override state = { name: "" };
+			constructor() {
+				super({ name: "" });
+			}
 		}
 
 		TemplesComponent.define("canonical-greeter", Greeter, {
@@ -306,7 +333,9 @@ describe("TemplesComponent.define", () => {
 
 	test("define(tagName, componentClass, options) derives the observed attributes from the attributes map", () => {
 		class Card extends TemplesComponent {
-			override state = { title: "", hidden: false };
+			constructor() {
+				super({ title: "", hidden: false });
+			}
 		}
 
 		TemplesComponent.define("attrs-derive", Card, {
@@ -331,7 +360,9 @@ describe("TemplesComponent.define", () => {
 
 	test("define(tagName, componentClass, options) coerces every attribute type in the attributes map", () => {
 		class Meter extends TemplesComponent {
-			override state = { count: 0, done: false, meta: null as unknown, label: "" };
+			constructor() {
+				super({ count: 0, done: false, meta: null, label: "" });
+			}
 		}
 
 		TemplesComponent.define("attrs-coerce", Meter, {
@@ -362,7 +393,10 @@ describe("TemplesComponent.define", () => {
 	test("define(tagName, componentClass, options) rejects a class that declares attribute statics", () => {
 		class Card extends TemplesComponent {
 			static override observedAttributes = ["title"];
-			override state = { title: "" };
+
+			constructor() {
+				super({ title: "" });
+			}
 		}
 
 		expect(() =>
@@ -374,7 +408,10 @@ describe("TemplesComponent.define", () => {
 
 		class Badge extends TemplesComponent {
 			static override attributeTypes: Record<string, AttributeType> = { level: "number" };
-			override state = { level: 0 };
+
+			constructor() {
+				super({ level: 0 });
+			}
 		}
 
 		expect(() =>
@@ -383,6 +420,25 @@ describe("TemplesComponent.define", () => {
 				attributes: { level: "number" }
 			})
 		).toThrow("declares attributes on static fields");
+	});
+
+	test("subclasses initialize the state through the constructor", () => {
+		class Card extends TemplesComponent {
+			constructor() {
+				super({ title: "Hello" });
+			}
+		}
+
+		TemplesComponent.define("ctor-state", Card, {
+			template: "<p data-bind='text=title'>?</p>"
+		});
+
+		const elt = document.createElement("ctor-state") as Card;
+		document.body.appendChild(elt);
+
+		expect(elt.state.title).toBe("Hello");
+		expect(elt.querySelector("p")?.textContent).toBe("Hello");
+		elt.remove();
 	});
 });
 
@@ -403,14 +459,10 @@ describe("TemplesComponent events", () => {
 
 		try {
 			class Alpha extends TemplesComponent {
-				override state = {};
-
 				onX(): void {}
 			}
 
 			class Beta extends TemplesComponent {
-				override state = {};
-
 				onX(): void {}
 			}
 
@@ -433,7 +485,9 @@ describe("TemplesComponent events", () => {
 		const captured: Array<{ evt: Event; self: TemplesComponent }> = [];
 
 		class Counter extends TemplesComponent {
-			override state = { count: 0 };
+			constructor() {
+				super({ count: 0 });
+			}
 
 			onInc(evt: Event): void {
 				captured.push({ evt, self: this });
@@ -461,8 +515,6 @@ describe("TemplesComponent events", () => {
 		let inputValue = "";
 
 		class Form extends TemplesComponent {
-			override state = {};
-
 			onSubmit(evt: Event): void {
 				evt.preventDefault();
 				defaultPrevented = evt.defaultPrevented;
@@ -491,7 +543,9 @@ describe("TemplesComponent events", () => {
 		const clicked: TemplesComponent[] = [];
 
 		class Counter extends TemplesComponent {
-			override state = { count: 0 };
+			constructor() {
+				super({ count: 0 });
+			}
 
 			onInc(): void {
 				clicked.push(this);
@@ -528,16 +582,12 @@ describe("TemplesComponent events", () => {
 		const outerHits: TemplesComponent[] = [];
 
 		class Inner extends TemplesComponent {
-			override state = {};
-
 			onAct(): void {
 				innerHits.push(this);
 			}
 		}
 
 		class Outer extends TemplesComponent {
-			override state = {};
-
 			onAct(): void {
 				outerHits.push(this);
 			}
@@ -569,8 +619,6 @@ describe("TemplesComponent events", () => {
 		let hits = 0;
 
 		class Counter extends TemplesComponent {
-			override state = {};
-
 			onInc(): void {
 				hits++;
 			}
@@ -594,8 +642,6 @@ describe("TemplesComponent events", () => {
 		let hits = 0;
 
 		class Counter extends TemplesComponent {
-			override state = {};
-
 			onInc(): void {
 				hits++;
 			}
@@ -625,13 +671,9 @@ describe("TemplesComponent messaging", () => {
 	test("emits a tag-prefixed message that a different class can subscribe to", () => {
 		const received: Array<{ evt: CustomEvent; self: TemplesComponent }> = [];
 
-		class TaskItem extends TemplesComponent {
-			override state = {};
-		}
+		class TaskItem extends TemplesComponent {}
 
 		class TaskList extends TemplesComponent {
-			override state = {};
-
 			onCompleted(evt: CustomEvent): void {
 				received.push({ evt, self: this });
 			}
@@ -661,16 +703,12 @@ describe("TemplesComponent messaging", () => {
 		const notes: unknown[] = [];
 
 		class TaskItem extends TemplesComponent {
-			override state = {};
-
 			onChanged(evt: CustomEvent): void {
 				items.push(evt.detail);
 			}
 		}
 
 		class TaskNote extends TemplesComponent {
-			override state = {};
-
 			onChanged(evt: CustomEvent): void {
 				notes.push(evt.detail);
 			}
@@ -700,8 +738,6 @@ describe("TemplesComponent messaging", () => {
 		let hits = 0;
 
 		class TaskItem extends TemplesComponent {
-			override state = {};
-
 			onPing(): void {
 				hits++;
 			}
@@ -722,13 +758,9 @@ describe("TemplesComponent messaging", () => {
 	test("disconnecting stops message delivery", () => {
 		let hits = 0;
 
-		class Emitter extends TemplesComponent {
-			override state = {};
-		}
+		class Emitter extends TemplesComponent {}
 
 		class Listener extends TemplesComponent {
-			override state = {};
-
 			onPing(): void {
 				hits++;
 			}
@@ -757,13 +789,9 @@ describe("TemplesComponent messaging", () => {
 	test("messaging works without connecting the components to the DOM", () => {
 		let hits = 0;
 
-		class TaskItem extends TemplesComponent {
-			override state = {};
-		}
+		class TaskItem extends TemplesComponent {}
 
 		class TaskList extends TemplesComponent {
-			override state = {};
-
 			onCompleted(): void {
 				hits++;
 			}
@@ -795,7 +823,9 @@ describe("TemplesComponent css and global store", () => {
 
 	test("define() seeds an observed attribute from the global store", () => {
 		class Widget extends TemplesComponent {
-			override state = { title: "" };
+			constructor() {
+				super({ title: "" });
+			}
 		}
 
 		TemplesComponent.define("store-seed", Widget, {
@@ -814,7 +844,9 @@ describe("TemplesComponent css and global store", () => {
 
 	test("an explicit attribute masks the same-named store key", () => {
 		class Widget extends TemplesComponent {
-			override state = { title: "" };
+			constructor() {
+				super({ title: "" });
+			}
 		}
 
 		TemplesComponent.define("store-mask", Widget, {

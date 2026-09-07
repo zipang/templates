@@ -185,11 +185,13 @@ export class TemplesComponent extends HTMLElement {
 	/**
 	 * Reactive component state.
 	 *
-	 * Subclasses assign an initial plain object, e.g. `state = { count: 0 }`.
-	 * The object is wrapped in a reactive proxy automatically when the component
-	 * connects, so any mutation re-renders the component.
+	 * Initialized through the constructor: a subclass passes its initial plain
+	 * object to `super()`, e.g. `super({ count: 0 })`. The object is wrapped in
+	 * a reactive proxy at construction, so any mutation re-renders the
+	 * component once it is connected. The property is defined by the
+	 * constructor, non-writable and non-configurable.
 	 */
-	declare state: Record<string, unknown>;
+	declare readonly state: Record<string, unknown>;
 
 	private renderer: Renderer | null = null;
 	private unsubscribeState: (() => void) | null = null;
@@ -206,9 +208,28 @@ export class TemplesComponent extends HTMLElement {
 	 */
 	private messageUnsubscribers: (() => void)[] = [];
 
-	constructor() {
+	/**
+	 * Create the component with its initial state.
+	 *
+	 * The platform instantiates custom elements with no arguments, so the
+	 * initial state defaults to an empty object. A subclass passes its own
+	 * initial values with `super({ count: 0 })`; `connectedCallback` then seeds
+	 * the observed attributes and the global store on top of them.
+	 *
+	 * The `state` property is defined non-writable and non-configurable, so a
+	 * subclass that redeclares it as a class field breaks at construction
+	 * instead of silently replacing the reactive proxy.
+	 *
+	 * @param state - The initial state values.
+	 */
+	constructor(state: Record<string, unknown> = {}) {
 		super();
-		this.state = {};
+		Object.defineProperty(this, "state", {
+			value: reactive(state),
+			writable: false,
+			enumerable: true,
+			configurable: false
+		});
 	}
 
 	/**
@@ -472,7 +493,6 @@ export class TemplesComponent extends HTMLElement {
 			}
 		}
 
-		this.state = reactive(this.state);
 		this.unsubscribeState = subscribe(this.state, () => this.rerender());
 		this.rerender();
 

@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { TemplesComponent } from "@temples/components";
-import { reactive } from "@temples/components/reactive";
 import { prepare } from "./ssr";
 
 describe("prepare", () => {
@@ -42,7 +41,9 @@ describe("prepare webComponents", () => {
 			static override template = "<p data-bind='text=name'>?</p>";
 			static override observedAttributes = ["name"];
 			static override css = "p { color: red; }";
-			override state = reactive({ name: "" });
+			constructor() {
+				super({ name: "" });
+			}
 		}
 
 		const render = prepare("<div><ssr-greeter></ssr-greeter></div>", {
@@ -61,7 +62,9 @@ describe("prepare webComponents", () => {
 			static override template = "<p data-bind='text=name'>?</p>";
 			static override observedAttributes = ["name"];
 			static override css = "p { color: red; }";
-			override state = reactive({ name: "" });
+			constructor() {
+				super({ name: "" });
+			}
 		}
 
 		const render = prepare(
@@ -81,7 +84,9 @@ describe("prepare webComponents", () => {
 			static override tag = "ssr-rdb";
 			static override template = "<p data-bind='text=name'>?</p>";
 			static override observedAttributes = ["name"];
-			override state = reactive({ name: "" });
+			constructor() {
+				super({ name: "" });
+			}
 		}
 
 		const render = prepare("<div><ssr-rdb></ssr-rdb></div>", {
@@ -102,7 +107,9 @@ describe("prepare a full page with components and the full binding range", () =>
 			"<article class='article-card'><h4 data-bind='text=title'>Title</h4><span class='badge' data-bind='class[featured|popular|quote]=type, text=type'>type</span></article>";
 		static override observedAttributes = ["title", "type"];
 		static override css = "article-card { border: 1px solid #ccc; }";
-		override state = reactive({ title: "", type: "" });
+		constructor() {
+			super({ title: "", type: "" });
+		}
 	}
 
 	class UserCard extends TemplesComponent {
@@ -111,7 +118,9 @@ describe("prepare a full page with components and the full binding range", () =>
 			"<div class='user-card'><img data-bind='src=avatar' alt=''><span data-bind='text=name'>Name</span></div>";
 		static override observedAttributes = ["name", "avatar"];
 		static override css = "user-card { display: block; }";
-		override state = reactive({ name: "", avatar: "" });
+		constructor() {
+			super({ name: "", avatar: "" });
+		}
 	}
 
 	const template = readFileSync(

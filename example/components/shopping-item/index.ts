@@ -13,18 +13,20 @@ import "./shopping-item.css";
  * carrying the full item, and the app owns the data.
  */
 export class ShoppingItem extends TemplesComponent {
-	override state = {
-		id: "",
-		label: "",
-		checked: false,
-		editing: false,
-		checkedClass() {
-			return this.checked ? "checked" : "unchecked";
-		},
-		notEditing() {
-			return !this.editing;
-		}
-	};
+	constructor() {
+		super({
+			id: "",
+			label: "",
+			checked: false,
+			editing: false,
+			checkedClass() {
+				return this.checked ? "checked" : "unchecked";
+			},
+			notEditing() {
+				return !this.editing;
+			}
+		});
+	}
 
 	/**
 	 * Flip the checked flag and publish the updated item.
@@ -65,10 +67,12 @@ export class ShoppingItem extends TemplesComponent {
 	 * Build the plain data payload carried by every message.
 	 */
 	private snapshot(): ShoppingItemData {
+		const state = this.state;
+
 		return {
-			id: this.state.id,
-			label: this.state.label,
-			checked: this.state.checked
+			id: state.id as string,
+			label: state.label as string,
+			checked: state.checked as boolean
 		};
 	}
 }

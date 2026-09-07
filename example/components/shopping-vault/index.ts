@@ -11,12 +11,16 @@ import "./shopping-vault.css";
  * to restore the item into the active list.
  */
 export class ShoppingVault extends TemplesComponent {
-	override state = {
-		vaultItems: [] as ShoppingItemData[],
-		isEmpty() {
-			return this.vaultItems.length === 0;
-		}
-	};
+	constructor() {
+		const state = {
+			vaultItems: [] as ShoppingItemData[],
+			isEmpty() {
+				return this.vaultItems.length === 0;
+			}
+		};
+
+		super(state);
+	}
 
 	static override events = {
 		"shopping-item:removed": "onRemoved",
@@ -27,7 +31,9 @@ export class ShoppingVault extends TemplesComponent {
 	 * Collect a removed item into the vault.
 	 */
 	onRemoved(evt: CustomEvent): void {
-		this.state.vaultItems.push(evt.detail as ShoppingItemData);
+		const items = this.state.vaultItems as ShoppingItemData[];
+
+		items.push(evt.detail as ShoppingItemData);
 	}
 
 	/**
@@ -39,11 +45,12 @@ export class ShoppingVault extends TemplesComponent {
 
 		if (id === null || id === undefined) return;
 
-		const item = this.state.vaultItems.find((entry) => entry.id === id);
+		const items = this.state.vaultItems as ShoppingItemData[];
+		const item = items.find((entry) => entry.id === id);
 
 		if (item === undefined) return;
 
-		this.state.vaultItems = this.state.vaultItems.filter((entry) => entry.id !== id);
+		this.state.vaultItems = items.filter((entry) => entry.id !== id);
 		this.emit("recalled", item);
 	}
 }

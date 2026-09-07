@@ -12,13 +12,24 @@ import "./shopping-app.css";
  * `shopping-item:removed`, and `shopping-vault:recalled`.
  */
 export class ShoppingApp extends TemplesComponent {
-	override state = {
-		title: "",
-		items: [] as ShoppingItemData[],
-		isEmpty() {
-			return this.items.length === 0;
-		}
-	};
+	constructor() {
+		const state = {
+			title: "",
+			items: [] as ShoppingItemData[],
+			isEmpty() {
+				return this.items.length === 0;
+			}
+		};
+
+		super(state);
+	}
+
+	/**
+	 * The active list, read from the untyped reactive state.
+	 */
+	private get items(): ShoppingItemData[] {
+		return this.state.items as ShoppingItemData[];
+	}
 
 	/**
 	 * Create a new item from the add form and publish it.
@@ -34,7 +45,7 @@ export class ShoppingApp extends TemplesComponent {
 
 		const item: ShoppingItemData = { id: crypto.randomUUID(), label, checked: false };
 
-		this.state.items.push(item);
+		this.items.push(item);
 		this.emit("created", item);
 
 		// RAZ and refocus
@@ -47,7 +58,7 @@ export class ShoppingApp extends TemplesComponent {
 	 */
 	updateItem(evt: CustomEvent): void {
 		const item = evt.detail as ShoppingItemData;
-		const existing = this.state.items.find((entry) => entry.id === item.id);
+		const existing = this.items.find((entry) => entry.id === item.id);
 
 		if (existing === undefined) return;
 
@@ -61,14 +72,14 @@ export class ShoppingApp extends TemplesComponent {
 	removeItem(evt: CustomEvent): void {
 		const item = evt.detail as ShoppingItemData;
 
-		this.state.items = this.state.items.filter((entry) => entry.id !== item.id);
+		this.state.items = this.items.filter((entry) => entry.id !== item.id);
 	}
 
 	/**
 	 * Restore a recalled item back into the active list.
 	 */
 	recallItem(evt: CustomEvent): void {
-		this.state.items.push(evt.detail as ShoppingItemData);
+		this.items.push(evt.detail as ShoppingItemData);
 	}
 }
 
