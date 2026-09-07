@@ -41,7 +41,7 @@ Test:        bun test
 Focus:       bun test packages/components
 Check:       bun run check
 Typecheck:   bun run typecheck
-Docs build:  bun run docs:build
+Docs build:  bun run build:docs
 ```
 
 ## Project Structure
@@ -140,7 +140,7 @@ const applyAttributes = (ctor: typeof TemplesComponent, attributes: Record<strin
 - Every component test registers through the three-argument form.
 - The example app declares no attribute statics.
 - The docs show one declaration form and document `attributes`.
-- `bun run check`, `bun run typecheck`, `bun test`, and `bun run docs:build` all pass.
+- `bun run check`, `bun run typecheck`, `bun test`, and `bun run build:docs` all pass.
 
 ## Out of Scope
 

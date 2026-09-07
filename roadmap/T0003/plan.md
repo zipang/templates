@@ -64,7 +64,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
     form only. The "Static fields" tables become a `DefineOptions` table with `attributes`. The
     State, Lifecycle, and API-reference sections name the `attributes` map. No doc mentions the
     class-form overload or the attribute statics.
-  - Verify: `bun run docs:build`, then read the built pages
+  - Verify: `bun run build:docs`, then read the built pages
   - Files: `packages/components/README.md`, `packages/docs/content/components.md`,
     `packages/docs/content/api-reference.md`
   - Depends: Task 1
@@ -79,7 +79,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
 - [ ] **Task 5: Full verification + commit preparation**
   - Acceptance: the full gate passes. Every docs snippet matches the implementation. The spec
     and the plan stay accurate.
-  - Verify: `bun run check && bun run typecheck && bun test && bun run docs:build`
+  - Verify: `bun run check && bun run typecheck && bun test && bun run build:docs`
   - Files: none expected
   - Depends: Tasks 2, 3, 4
 
