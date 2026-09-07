@@ -1,6 +1,6 @@
 # @temples/components
 
-Declarative Web Components built on the [Temples](https://github.com/zipang/Temples) template
+Declarative Web Components built on the [temples](https://github.com/zipang/temples) template
 engine. Inherit from `TemplesComponent` instead of `HTMLElement`, and the template, state, and
 event wiring become declarative.
 
@@ -93,7 +93,7 @@ flipping-card {
 
 ## Documentation
 
-Full guides and API reference: https://zipang.github.io/Temples/
+Full guides and API reference: https://zipang.github.io/temples/
 
 ## License
 

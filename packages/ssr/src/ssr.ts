@@ -32,7 +32,7 @@ export interface PrepareOptions {
 	rehydrate?: boolean;
 
 	/**
-	 * Remove every Temples trace from the output: all `data-*` binding
+	 * Remove every temples trace from the output: all `data-*` binding
 	 * attributes and every used component, rendered to plain static markup.
 	 */
 	removeDataBindings?: boolean;
@@ -46,7 +46,7 @@ export interface PrepareOptions {
 
 /**
  * A prepared render function:
- * renders data through the Temples data binding engine with support of TemplesComponents
+ * renders data through the temples data binding engine with support of TemplesComponents
  * @returns HTML string.
  */
 export type RenderFunction = (data: TemplesData) => Promise<string>;

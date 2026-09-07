@@ -67,7 +67,7 @@ Build order: engine first, then components/ssr/jquery (their `.d.ts` resolution 
 
 ### 4. Docs workspace (`packages/docs`)
 - `content/*.md` — one file per page, with a small front-matter block (title, description, order).
-- `layout.html` — a Temples template: nav via `data-iterate`, page content injected with
+- `layout.html` — a temples template: nav via `data-iterate`, page content injected with
   `data-bind="html=page.content"`, title/head via `data-bind`.
 - `build.ts` — the pipeline: read manifest → `Bun.markdown.html(md, { headings: { ids: true } })`
   → feed `{ title, content, nav }` into a `Renderer` (layout) → `renderToString()` → write

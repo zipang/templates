@@ -134,9 +134,9 @@ describe("prepare a full page with components and the full binding range", () =>
 		name: "Jane",
 		avatar: "/img/jane.png",
 		page: {
-			title: "My Temples Blog",
+			title: "My temples Blog",
 			tagline: "Templates you won't hate",
-			footer: "© 2026 Temples"
+			footer: "© 2026 temples"
 		},
 		article: {
 			title: "The Great Race",
@@ -183,8 +183,8 @@ describe("prepare a full page with components and the full binding range", () =>
 
 		const html = await render(storeWithContent);
 
-		expect(html).toContain("<title>My Temples Blog</title>");
-		expect(html).toContain("<h1>My Temples Blog</h1>");
+		expect(html).toContain("<title>My temples Blog</title>");
+		expect(html).toContain("<h1>My temples Blog</h1>");
 		expect(html).toContain('<p class="tagline">Templates you won\'t hate</p>');
 		expect(html).toContain("<h2>The Great Race</h2>");
 		expect(html).toContain("<em>An epic</em> tale of speed.");
@@ -237,7 +237,7 @@ describe("prepare a full page with components and the full binding range", () =>
 
 		const first = await render(storeWithContent);
 
-		expect(first).toContain("<h1>My Temples Blog</h1>");
+		expect(first).toContain("<h1>My temples Blog</h1>");
 		expect(first).toContain("<p>Quiet!</p>");
 		expect(first).toContain("<h4>Store Title</h4>");
 		expect(first).not.toContain("display:none");
@@ -252,9 +252,9 @@ describe("prepare a full page with components and the full binding range", () =>
 		expect(second).toContain('class="row popular"');
 		expect(second).not.toContain("The Sequel");
 		expect(second).not.toContain("display:none");
-		expect(second).not.toContain("Temples says:");
+		expect(second).not.toContain("temples says:");
 		expect(second).not.toContain("Quiet!");
-		expect(second).not.toContain("My Temples Blog");
+		expect(second).not.toContain("My temples Blog");
 		expect(second).not.toContain("/news");
 		expect(second).not.toContain("Store Title");
 

@@ -1,12 +1,12 @@
 ---
 title: Getting started
-description: Install the Temples packages and render your first template in five minutes.
+description: Install the temples packages and render your first template in five minutes.
 order: 1
 ---
 
 # Getting started
 
-Temples renders data into plain HTML. A template is a normal HTML fragment decorated with a few
+temples renders data into plain HTML. A template is a normal HTML fragment decorated with a few
 `data-*` attributes. Nothing else: no framework, no build step, no non-HTML syntax.
 
 ## Install
@@ -73,7 +73,7 @@ that exact path:
 renderer.update("user.fullname", "Jane DOE");
 ```
 
-This is what makes Temples suitable for live updates: a websocket message that carries one value
+This is what makes temples suitable for live updates: a websocket message that carries one value
 re-renders one binding, not the page.
 
 ## Serialize to HTML

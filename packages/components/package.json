@@ -2,16 +2,16 @@
 	"name": "@temples/components",
 	"version": "1.0.0",
 	"type": "module",
-	"description": "Declarative Web Components built on the Temples template engine, with reactive state.",
+	"description": "Declarative Web Components built on the temples template engine, with reactive state.",
 	"license": "MIT",
-	"homepage": "https://zipang.github.io/Temples/",
+	"homepage": "https://zipang.github.io/temples/",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/zipang/Temples.git",
+		"url": "git+https://github.com/zipang/temples.git",
 		"directory": "packages/components"
 	},
 	"bugs": {
-		"url": "https://github.com/zipang/Temples/issues"
+		"url": "https://github.com/zipang/temples/issues"
 	},
 	"keywords": [
 		"web-components",

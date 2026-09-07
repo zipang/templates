@@ -1,5 +1,5 @@
 ---
-title: Temples documentation
+title: temples documentation
 description: Declarative HTML templates rendered by a DOM-based engine, in the browser and on the server.
 order: 0
 ---

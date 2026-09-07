@@ -11,7 +11,7 @@ import { getProperty, hasProperty, setProperty } from "./utilities/properties";
 export type RenderValue = string | number | boolean | null | undefined;
 
 /**
- * The recursive dictionary shape that Temples renders against.
+ * The recursive dictionary shape that temples renders against.
  *
  * Every key is a string. Every value is a scalar, a parameterless function
  * that returns a scalar, or another dictionary of the same shape. Declared as
@@ -23,7 +23,7 @@ export interface TemplesData {
 }
 
 /**
- * A value held in a Temples data dictionary.
+ * A value held in a temples data dictionary.
  *
  * A value is a scalar (`RenderValue`), a parameterless function returning a
  * scalar, a nested dictionary, or an array of values. The function is called
@@ -539,7 +539,7 @@ const buildIterate = (
  * The prefix identifies engine-owned comments, so `stripPlaceholders` removes
  * them without touching the template's own comments.
  */
-const PLACEHOLDER_PREFIX = "Temples says:";
+const PLACEHOLDER_PREFIX = "temples says:";
 
 /**
  * Remove the engine's conditional placeholders from a subtree.

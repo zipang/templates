@@ -1,6 +1,6 @@
 # @temples/docs
 
-The documentation site of the Temples packages — built **with Temples itself**.
+The documentation site of the temples packages — built **with temples itself**.
 
 ## How it works
 
@@ -17,7 +17,7 @@ content/*.md  ──raw copy─────────────▶  dist/<sl
   and `order` (nav ordering). A page with `hidden: true` is built but stays out of the
   navigation and `llms.txt`.
 - `content/404.md` — the 404 error page, kept out of the navigation by `hidden: true`.
-- `layout.html` — a Temples template: the nav iterates `site.pages` (`data-iterate`), the page
+- `layout.html` — a temples template: the nav iterates `site.pages` (`data-iterate`), the page
   body is injected with `data-bind="html=page.content"`. The head declares the markdown export
   of the page with `<link rel="alternate" type="text/markdown">`, kept only while
   `data-render-if="page.markdownUrl"` is truthy — hidden pages carry an empty `markdownUrl`,
@@ -45,7 +45,7 @@ The site is a plain static output: any static host works, with `dist/` as the pu
 and `bun install && bun run docs:build` as the build command.
 
 - **GitHub Pages** — `.github/workflows/docs.yml` deploys on every push to `main`. Pages serves
-  the site under a subpath (`/Temples/`), which the build supports because all asset and page
+  the site under a subpath (`/temples/`), which the build supports because all asset and page
   links are relative. Pages also uses `dist/404.html` as its error page.
 - **Vercel / Netlify / Cloudflare Pages** — create a project pointed at this repository with:
   - build command: `bun install && bun run docs:build`

@@ -41,7 +41,7 @@ Tasks are ordered by dependency. Follow `test-driven-development` for any new lo
 
 - [x] **T4: Docs pipeline (`packages/docs`)**
   - Acceptance: `packages/docs/build.ts` reads the content manifest, converts markdown with
-    `Bun.markdown` (isolated in `src/markdown.ts`), renders pages through a Temples layout
+    `Bun.markdown` (isolated in `src/markdown.ts`), renders pages through a temples layout
     (`Renderer` + `@temples/ssr`) with nav iteration and `data-bind="html=page.content"`, and
     writes `docs/dist/<slug>/index.html` + relative assets. Works under a subpath base.
   - Verify: `bun run docs:build` produces valid HTML for every page; spot-check in a browser.

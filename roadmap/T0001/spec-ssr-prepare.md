@@ -119,14 +119,14 @@ wiring). This is the final and most difficult task.
 
 ### `removeDataBinding: true`
 
-All traces of Temples disappear from the output:
+All traces of temples disappear from the output:
 
 - every `data-*` binding attribute is removed, and
 - every used `TemplesComponent` is rendered to its plain static markup, with no
-  custom tag remaining and no Temples event wiring.
+  custom tag remaining and no temples event wiring.
 
 `removeDataBinding` and `rehydrate` are mutually exclusive: `removeDataBinding`
-produces static markup with no Temples footprint, while `rehydrate` keeps
+produces static markup with no temples footprint, while `rehydrate` keeps
 components active in the browser.
 
 ### `webComponents`
@@ -143,7 +143,7 @@ Support `TemplesComponent` usage in the template:
 - events are wired only when `rehydrate` is also true.
 
 `webComponents` and `removeDataBinding` together render components to plain markup
-with no Temples footprint.
+with no temples footprint.
 
 ## Testing Strategy
 
@@ -206,7 +206,7 @@ with no Temples footprint.
    `import stylesheet from "./component.css"`. `prepare` concatenates all used
    component `css` into one `<style>` tag.
 3. ~~`disappear` vs `rehydrate` conflict~~ RESOLVED — renamed `disappear` to
-   `removeDataBinding`. `removeDataBinding` (static output, no Temples footprint)
+   `removeDataBinding`. `removeDataBinding` (static output, no temples footprint)
    and `rehydrate` (components active in the browser) are mutually exclusive.
 4. ~~Should `prepare` accept an `Element`/`DocumentFragment` source?~~ RESOLVED —
    string-only. The template is a string on the server.

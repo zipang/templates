@@ -2,16 +2,16 @@
 	"name": "@temples/ssr",
 	"version": "1.0.0",
 	"type": "module",
-	"description": "Server-side rendering and static site generation for the Temples template engine, wired to linkedom.",
+	"description": "Server-side rendering and static site generation for the temples template engine, wired to linkedom.",
 	"license": "MIT",
-	"homepage": "https://zipang.github.io/Temples/",
+	"homepage": "https://zipang.github.io/temples/",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/zipang/Temples.git",
+		"url": "git+https://github.com/zipang/temples.git",
 		"directory": "packages/ssr"
 	},
 	"bugs": {
-		"url": "https://github.com/zipang/Temples/issues"
+		"url": "https://github.com/zipang/temples/issues"
 	},
 	"keywords": [
 		"ssr",

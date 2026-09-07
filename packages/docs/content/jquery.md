@@ -1,6 +1,6 @@
 ---
 title: jQuery plugin
-description: Render Temples data into jQuery collections.
+description: Render temples data into jQuery collections.
 order: 5
 ---
 

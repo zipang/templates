@@ -1,6 +1,6 @@
 ---
 title: SSR and static site generation
-description: Render Temples templates to HTML strings on the server with linkedom.
+description: Render temples templates to HTML strings on the server with linkedom.
 order: 4
 ---
 
@@ -68,7 +68,7 @@ console.log(await render({ message: "Hello world" })); // <p>Hello world</p>
 
 | Option | Default | Effect |
 |--------|---------|--------|
-| `removeDataBindings` | `true` | Strip every Temples trace from the output: all `data-*` control attributes, and every used component rendered to plain static markup. |
+| `removeDataBindings` | `true` | Strip every temples trace from the output: all `data-*` control attributes, and every used component rendered to plain static markup. |
 | `templesComponents` | `[]` | `TemplesComponent` classes used by the source (see below). |
 | `rehydrate` | `false` | Reserved: include the component library so custom elements mount and activate in the browser. |
 

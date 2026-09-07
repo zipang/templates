@@ -1,6 +1,6 @@
 # @temples/engine
 
-The standalone, DOM-based templating engine of [Temples](https://github.com/zipang/Temples).
+The standalone, DOM-based templating engine of [temples](https://github.com/zipang/temples).
 Templates are plain HTML decorated with a few `data-*` attributes. The engine renders structured
 data into them and re-renders single paths for real-time partial updates.
 
@@ -80,7 +80,7 @@ console.log(renderer.renderToString()); // <h1>The Great Race</h1>
 
 ## Documentation
 
-Full guides and API reference: https://zipang.github.io/Temples/
+Full guides and API reference: https://zipang.github.io/temples/
 
 ## License
 

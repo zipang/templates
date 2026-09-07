@@ -7,7 +7,7 @@ import { markdownToHtml } from "./markdown";
 const DOCS_DIR = resolve(import.meta.dir, "..");
 
 /** Public URL of the deployed site, used for the absolute links in llms.txt. */
-const BASE_URL = "https://zipang.github.io/Temples";
+const BASE_URL = "https://zipang.github.io/temples";
 
 /** The directory holding the markdown sources. */
 const CONTENT_DIR = resolve(DOCS_DIR, "content");
@@ -114,7 +114,7 @@ const loadPages = async (): Promise<PageSource[]> => {
  */
 const buildLlmsTxt = (pages: PageMeta[]): string => {
 	const lines = [
-		"# Temples documentation",
+		"# temples documentation",
 		"",
 		"> Declarative HTML templates: plain HTML with data-bind attributes, rendered by a DOM-based engine in the browser and on the server.",
 		"",
@@ -127,7 +127,7 @@ const buildLlmsTxt = (pages: PageMeta[]): string => {
 		lines.push(`- [${page.title}](${BASE_URL}/${page.markdownUrl}): ${description}`);
 	}
 
-	lines.push("", `Sources: https://github.com/zipang/Temples`, "");
+	lines.push("", `Sources: https://github.com/zipang/temples`, "");
 
 	return lines.join("\n");
 };
@@ -135,7 +135,7 @@ const buildLlmsTxt = (pages: PageMeta[]): string => {
 /**
  * Build the static documentation site into `dist/`.
  *
- * Every markdown page is converted to HTML, rendered through the Temples
+ * Every markdown page is converted to HTML, rendered through the temples
  * layout with `@temples/ssr`, and written as `<slug>.html`. Its raw markdown
  * source is copied next to it as `<slug>.md`, for agents reading plain text.
  * The stylesheet and an `llms.txt` agent index are emitted alongside; the

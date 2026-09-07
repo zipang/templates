@@ -72,7 +72,7 @@ value `false` removes the attribute instead of writing the string `"false"`.
 
 ### The `class` target
 
-The `class` attribute is a space-separated list, so Temples toggles one value in place instead of
+The `class` attribute is a space-separated list, so temples toggles one value in place instead of
 replacing the list. Declare the candidates inside brackets:
 
 ```html
@@ -107,7 +107,7 @@ Syntax variants — all equivalent:
 <div data-each="quote from article.quotes">...</div>
 ```
 
-Without an explicit variable name, Temples derives one from the path by dropping a trailing
+Without an explicit variable name, temples derives one from the path by dropping a trailing
 `-s`: `article.tags` iterates as `tag`, and `status` stays `status` (no trailing `s` to drop).
 
 Inside a row, the iteration variable is merged into the data, so bindings resolve
@@ -124,7 +124,7 @@ rely on an `id` property in the items:
 </ul>
 ```
 
-When the collection changes, Temples reconciles: unchanged rows keep their DOM element, removed
+When the collection changes, temples reconciles: unchanged rows keep their DOM element, removed
 rows are deleted, new rows are inserted, and rows are moved to match the new order. Input focus,
 scroll position, and animations survive a re-render.
 

@@ -1,6 +1,6 @@
 # @temples/jquery
 
-The jQuery plugin for the [Temples](https://github.com/zipang/Temples) template engine. It renders
+The jQuery plugin for the [temples](https://github.com/zipang/temples) template engine. It renders
 data into each matched element with the same `data-*` binding attributes as the standalone engine.
 
 ## Install
@@ -26,7 +26,7 @@ import registers `$.fn.temples`.
 
 ## Documentation
 
-Full guides and API reference: https://zipang.github.io/Temples/
+Full guides and API reference: https://zipang.github.io/temples/
 
 ## License
 

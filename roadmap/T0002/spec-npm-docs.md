@@ -2,7 +2,7 @@
 
 ## Objective
 
-Restructure the Temples 1.0 repository into a Bun workspace monorepo and publish four packages to npm:
+Restructure the temples 1.0 repository into a Bun workspace monorepo and publish four packages to npm:
 
 - `@temples/engine` — the standalone `Renderer` core (the main package).
 - `@temples/components` — the `TemplesComponent` base class. Depends on `@temples/engine`.
@@ -10,11 +10,11 @@ Restructure the Temples 1.0 repository into a Bun workspace monorepo and publish
 - `@temples/jquery` — the `$.fn.temples(data)` plugin. Depends on `@temples/engine`.
 
 Before publishing, build a documentation site from markdown sources in `docs/`, rendered by
-Temples itself (dogfood: `Bun.markdown` → Temples `Renderer` → `renderToString`), deployable as a
+temples itself (dogfood: `Bun.markdown` → temples `Renderer` → `renderToString`), deployable as a
 plain static site (GitHub Pages primary, Vercel documented as an alternative), with an `llms.txt`
 so AI coding agents can discover and consume the docs.
 
-**Users:** humans evaluating and learning Temples; AI coding agents implementing with it.
+**Users:** humans evaluating and learning temples; AI coding agents implementing with it.
 **Why now:** npm publishing is blocked (invalid `"name": "@temples"`), the root README documents an
 outdated API (`this.data`, `update(path, value)`) versus the current reactive API (`this.state`), and
 dogfooding the SSG pipeline is the proof the engine is production-ready.

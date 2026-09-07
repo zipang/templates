@@ -1,7 +1,7 @@
 # @temples/ssr
 
 Server-side rendering (SSR) and static site generation (SSG) for the
-[Temples](https://github.com/zipang/Temples) template engine. The entry wires the engine to
+[temples](https://github.com/zipang/temples) template engine. The entry wires the engine to
 [linkedom](https://github.com/WebReflection/linkedom), so templates render to HTML strings on
 Bun, Node.js, or Deno without a browser.
 
@@ -46,14 +46,14 @@ Options:
 | Option | Effect |
 |--------|--------|
 | `templesComponents` | Array of `TemplesComponent` classes used by the source. Each custom tag renders to its component markup, and each component's `css` is concatenated into one `<style>` tag. |
-| `removeDataBinding` | Strip every Temples trace from the output: all `data-*` control attributes, and every used component rendered to plain static markup. |
+| `removeDataBinding` | Strip every temples trace from the output: all `data-*` control attributes, and every used component rendered to plain static markup. |
 
 The data passed to each render call also seeds the components' global store: an attribute absent
 from the markup resolves from the render data, and an explicit attribute on the tag wins.
 
 ## Documentation
 
-Full guides and API reference: https://zipang.github.io/Temples/
+Full guides and API reference: https://zipang.github.io/temples/
 
 ## License
 

@@ -3,7 +3,7 @@
 	"private": true,
 	"version": "1.0.0",
 	"type": "module",
-	"description": "Documentation site for the Temples packages, built with Temples itself.",
+	"description": "Documentation site for the temples packages, built with temples itself.",
 	"scripts": {
 		"build": "bun run src/build.ts",
 		"serve": "bun run src/serve.ts"

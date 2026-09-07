@@ -293,7 +293,7 @@ describe("Renderer data-iterate", () => {
 		renderer.render({
 			article: {
 				tags: [
-					{ label: "Temples", url: "/temples" },
+					{ label: "temples", url: "/temples" },
 					{ label: "Binding", url: "/binding" }
 				]
 			}
@@ -302,7 +302,7 @@ describe("Renderer data-iterate", () => {
 		const links = renderer.rootElt.querySelectorAll("a");
 
 		expect(links.length).toBe(2);
-		expect(links[0]?.textContent).toBe("Temples");
+		expect(links[0]?.textContent).toBe("temples");
 		expect(links[0]?.getAttribute("href")).toBe("/temples");
 		expect(links[1]?.textContent).toBe("Binding");
 	});
@@ -443,7 +443,7 @@ describe("Renderer data-render-if", () => {
 
 		renderer.render({ show: false });
 
-		expect(renderer.rootElt.innerHTML).toContain("Temples says: show=false");
+		expect(renderer.rootElt.innerHTML).toContain("temples says: show=false");
 	});
 
 	test("strips the placeholder from serialized output", () => {

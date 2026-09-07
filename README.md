@@ -1,13 +1,13 @@
-# Temples: Declarative HTML Templates
+# @temples: Declarative HTML Templates
 
-![Temples logo](assets/temples-logo.png)
+![@temples logo](assets/temples-logo.png)
 
-`Temples` (templ*at*es that you won't hate) is a templating system for HTML. Templates are plain
+`@temples` or `templ(at)es` are templates for HTML that you won't hate. Templates are plain
 HTML blocks decorated with a few `data-bind` attributes — no non-HTML syntax, no framework. The
 same templates render in the browser and on the server.
 
 This repository is a Bun workspace monorepo. It is a rewriting of the original
-[Temples v0](https://github.com/zipang/Temples/tree/v0) template system, with jQuery replaced by a
+[temples v0](https://github.com/zipang/temples/tree/v0) template system, with jQuery replaced by a
 standard, DOM-based engine.
 
 ## Packages
@@ -21,8 +21,8 @@ standard, DOM-based engine.
 
 ## Documentation
 
-The documentation site is built in [`packages/docs`](packages/docs) — with Temples itself. It
-deploys as a static site to <https://zipang.github.io/Temples/>, and ships an `llms.txt` for AI
+The documentation site is built in [`packages/docs`](packages/docs) — with temples itself. It
+deploys as a static site to <https://zipang.github.io/temples/>, and ships an `llms.txt` for AI
 coding agents.
 
 ## Development
@@ -45,7 +45,7 @@ packages/
   components/   @temples/components
   ssr/          @temples/ssr
   jquery/       @temples/jquery
-  docs/         documentation site (private, built with Temples)
+  docs/         documentation site (private, built with temples)
 example/        shopping-list demo app
 tasks/          spec, plan, and task list
 ```

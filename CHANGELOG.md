@@ -16,7 +16,7 @@ First public release. The repository is now a Bun workspace monorepo publishing 
 - Workspace layout: `packages/engine`, `packages/components`, `packages/ssr`, `packages/jquery`,
   with inter-package dependencies on `@temples/engine`.
 - `@temples/components/reactive` subpath export for direct use of the reactive proxy.
-- Documentation site (`packages/docs`) built with Temples itself: markdown sources rendered
+- Documentation site (`packages/docs`) built with temples itself: markdown sources rendered
   through `@temples/ssr` into a static site, deployable to GitHub Pages, Vercel, Netlify, or
   Cloudflare Pages. Ships an `llms.txt` agent index.
 - GitHub Actions workflow deploying the docs to GitHub Pages.

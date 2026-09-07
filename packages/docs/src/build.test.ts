@@ -18,7 +18,7 @@ describe("docs build", () => {
 
 		const llms = await Bun.file(resolve(distDir, "llms.txt")).text();
 
-		expect(llms).toContain("# Temples documentation");
+		expect(llms).toContain("# temples documentation");
 		expect(llms).toContain("## Pages");
 
 		for (const page of pages) {
@@ -53,7 +53,7 @@ describe("docs build", () => {
 
 		const llms = await Bun.file(resolve(distDir, "llms.txt")).text();
 
-		expect(llms).toContain("(https://zipang.github.io/Temples/getting-started.md)");
+		expect(llms).toContain("(https://zipang.github.io/temples/getting-started.md)");
 		expect(llms).not.toContain(".html");
 
 		const notFoundMarkdown = Bun.file(resolve(distDir, "404.md"));

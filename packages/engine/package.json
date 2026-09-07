@@ -4,14 +4,14 @@
 	"type": "module",
 	"description": "Declarative DOM-based HTML template engine: data-bind attributes, partial real-time updates, no framework.",
 	"license": "MIT",
-	"homepage": "https://zipang.github.io/Temples/",
+	"homepage": "https://zipang.github.io/temples/",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/zipang/Temples.git",
+		"url": "git+https://github.com/zipang/temples.git",
 		"directory": "packages/engine"
 	},
 	"bugs": {
-		"url": "https://github.com/zipang/Temples/issues"
+		"url": "https://github.com/zipang/temples/issues"
 	},
 	"keywords": [
 		"html",
