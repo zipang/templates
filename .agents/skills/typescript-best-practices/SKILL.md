@@ -1,6 +1,6 @@
 ---
 name: typescript-best-practices
-description: TypeScript discipline for writing strict, honest types. Use when writing or modifying TypeScript, when designing types and interfaces, when narrowing or casting values, or when the code-review-and-quality skill flags lazy typing. Triggers include "type this", "fix this type error", "is this type safe", "should I use unknown", or any TS type-design decision.
+description: TypeScript discipline for writing strict, honest types. Use when writing or modifying TypeScript, when designing types and interfaces, when narrowing or casting values, or when the follow-the-rules skill flags lazy typing. Triggers include "type this", "fix this type error", "is this type safe", "should I use unknown", or any TS type-design decision.
 ---
 
 # TypeScript Best Practices
@@ -14,7 +14,7 @@ A TypeScript type is the contract between a function and its callers. Write type
 - When writing or modifying TypeScript code.
 - When designing types, interfaces, or recursive data shapes.
 - When narrowing a value or reaching for a cast.
-- When the `code-review-and-quality` skill flags lazy typing.
+- When the `follow-the-rules` skill flags lazy typing.
 
 ## Core Rules
 
@@ -131,5 +131,5 @@ if (current == null) return "";
 
 ## See Also
 
-- `code-review-and-quality` — review-time typing checks reference this skill.
+- `follow-the-rules` — review-time typing checks reference this skill.
 - `use-bun` — tooling and test runner for TypeScript in this project.

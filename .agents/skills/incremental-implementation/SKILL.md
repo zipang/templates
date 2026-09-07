@@ -140,7 +140,7 @@ Each increment changes one logical thing. Don't mix concerns:
 
 **Good:** Three separate commits — one for each change.
 
-### Rule 2: Keep It Compilable
+### Rule 2: Keep It Working
 
 After each increment, the project must build and existing tests must pass. Don't leave the codebase in a broken state between slices.
 

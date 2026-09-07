@@ -52,6 +52,9 @@ When confidence is below ~70%, append a brief reason on the same line — what's
 
 ### Step 2: Ask one question at a time, each with a guess attached
 
+**Obligation:** every question MUST be asked with the Opencode `question` tool —
+one question per call. Never write questions as plain prose messages.
+
 Format:
 
 ```

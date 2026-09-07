@@ -23,27 +23,38 @@ Write prose in ASD-STE100 Simplified Technical English (STE). Use it for the tec
 
 ## Rules
 
-WORDS
-- Use one name for one thing. Do not call the same item by two different names.
+### WORDS
+- Use one name for one thing (use the GLOSSARY). Do not call the same item by two different names.
 - Use the short common word: start (not begin/commence/initiate), use (not utilize/leverage), help (not facilitate), make sure (not ensure), before (not prior to), after (not subsequent to), about (not regarding/concerning), get (not obtain/acquire), show (not demonstrate), also (not additionally/furthermore/moreover).
 - Give each word one meaning. "fall" means to move down, not to decrease.
 - No marketing adjectives: seamless, robust, powerful, cutting-edge, effortless, world-class, next-generation, revolutionary.
 - American spelling.
 
-VERBS
+### GLOSSARY
+- Every team, and so every project has its own 'names' for naming common things known to them only: we must put them into the common project Glossary.
+- Location: the project's glossary is located inside the main root `README.md` file of the project in a last chapter simply named '## Glossary'.
+- Content: It contains a list of words with their special meaning and usage inside the project. It may add an explanation of why and how this words were chosen.
+- Actualization: Everytime you are in doubt about a concept that is ambiguous or vaguely named, take the opportunity to ask the user what is the thing he is talking about.. Propose standard technical names for the concept you think is in the mind of the user. Clarify the concept and add an entry in the glossary if the usage is special in the project. Keep the entries alphabetically sorted.   
+
+Example:
+```
+- **Prototype**: In the context of this projet _the prototype_ is the first incomplete version of the application that was created (vibe coded) with Figma Make and is now located inside the project's root inside the `./prototype/` directory. It is a React application with fake data and 80% of the screens completed. It must be used as a reference, a first draft of the features being developped. 
+```
+
+### VERBS
 - Active voice. "the parser reads the file", not "the file is read by the parser".
 - Use a verb for an action. "analyze the log", not "perform an analysis of the log".
 - No stacked auxiliaries. Not "it is important to note that this may help to improve". Write "this improves X".
 - No "-ing" main verb where a simple tense works.
 
-SENTENCES
+### SENTENCES
 - One instruction per sentence. Max 20 words (instruction), max 25 (descriptive).
 - No contractions. Use articles: a, an, the, this, these.
 
-PUNCTUATION
+### PUNCTUATION
 - No semicolons. Write two sentences. (Note: the em dash is not banned by STE, only the semicolon is — add "no em dash" yourself if you want it gone.)
 
-STRUCTURE
+### STRUCTURE
 - One topic per paragraph, max six sentences. For steps, use a numbered vertical list, one action per item, imperative form. Put a condition before its command.
 
 Write only the requested text. No preamble, no summary, no closing remarks.

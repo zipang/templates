@@ -375,7 +375,7 @@ For JavaScript/TypeScript testing patterns illustrating these principles — Jes
 ## Red Flags
 
 - Writing code without any corresponding tests
-- Reaching for a default test command (`npm test`) without checking what this repository actually uses
+- Reaching for a default test command (`bun test`) without checking what this repository actually uses
 - Tests that pass on the first run (they may not be testing what you think)
 - "All tests pass" but no tests were actually run
 - Bug fixes without reproduction tests
@@ -389,7 +389,7 @@ For JavaScript/TypeScript testing patterns illustrating these principles — Jes
 After completing any implementation:
 
 - [ ] Every new behavior has a corresponding test
-- [ ] The full suite passes, run with the repository's own test command (`npm test`, `./gradlew test`, `pytest`, `go test ./...`, ...)
+- [ ] The full suite passes, run with the repository's own test command (`bun test`, `./gradlew test`, `pytest`, `go test ./...`, ...)
 - [ ] Bug fixes include a reproduction test that failed before the fix
 - [ ] Test names describe the behavior being verified
 - [ ] No tests were skipped or disabled

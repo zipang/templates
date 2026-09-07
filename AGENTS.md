@@ -9,7 +9,7 @@ If architectural decisions change the way things are done, always ensure that th
 ## Agent Skills
 
 This project uses a set of agent skills that encode the engineering workflow. They live in `.agents/skills/` and are loaded on demand. This file documents how they are discovered, how to pick the right one, and the operating behaviors that apply to all of them.
-Skills are workflows, not suggestions — follow the steps in order and don't skip their verification steps. Multiple skills can apply to a single task (e.g. `spec-driven-development` → `planning-and-task-breakdown` → `incremental-implementation` → `test-driven-development` → `code-review-and-quality`).
+Skills are workflows, not suggestions — follow the steps in order and don't skip their verification steps. Multiple skills can apply to a single task (e.g. `spec-driven-development` → `planning-and-task-breakdown` → `incremental-implementation` → `test-driven-development` → `follow-the-rules`).
 
 ### Skill Discovery
 
@@ -31,14 +31,14 @@ Task arrives
     │   └── JS/TS tooling? ────────────────→ use-bun
     ├── Writing/running tests? ─────────────→ test-driven-development
     │   └── Testing/debugging real web app pages? → agent-browser
-    ├── Reviewing code? ───────────────────→ code-review-and-quality
+    ├── Reviewing code? ───────────────────────→ follow-the-rules
     │   ├── Lazy typing? ──────────────────→ typescript-best-practices
     │   └── Too complex? ──────────────────→ code-simplification
     ├── Writing docs, instructions or comments? → technical-writing
 ```
 
 **When in doubt, start with a spec.** If a task is non-trivial and has no spec, begin with `spec-driven-development`.
-Not every task needs every step. A bug fix might only need: `test-driven-development` → `code-review-and-quality`.
+Not every task needs every step. A bug fix might only need: `test-driven-development` → `follow-the-rules`.
 
 ### Operating Behaviors
 
@@ -70,7 +70,7 @@ These behaviors apply at all times, across all skills. They are non-negotiable. 
 | Tooling | `use-bun` | Use Bun instead of Node.js tooling |
 | Verify | `test-driven-development` | Failing test first, then make it pass |
 | Verify | `agent-browser` | Test/debug real web pages & components in a browser |
-| Review | `code-review-and-quality` | Multi-axis code review before merge |
+| Review | `follow-the-rules` | Conformance review against the project's quality rules |
 | Review | `code-simplification` | Preserve behavior while reducing unnecessary complexity |
 | Write | `technical-writing` | Technical prose in Simplified Technical English (STE) |
 

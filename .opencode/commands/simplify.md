@@ -1,6 +1,7 @@
 ---
-description: Reduce complexity while preserving behavior
+description: Simplify instructions or code while preserving behavior
 ---
-Invoke the `code-simplification` skill for: $ARGUMENTS
+Review the files given in $ARGUMENTS.
 
-Simplify code for clarity while preserving exact behavior. The test: would a new team member understand this faster than before?
+1. Code files: use the `code-simplification` skill to improve them.
+2. Instructions or docs (AGENTS.md, README.md): use the `technical-writing` skill to apply the project's glossary and reduce the content to its simplest effective form. Remove repetition and rules already stated elsewhere.
