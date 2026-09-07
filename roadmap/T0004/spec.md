@@ -73,7 +73,7 @@ The class gains one type parameter. The state contract from T0003 (constructor i
 non-writable property) is unchanged at runtime:
 
 ```typescript
-export class TemplesComponent<T = Record<string, unknown>> extends HTMLElement {
+export class TemplesComponent<T extends object = Record<string, unknown>> extends HTMLElement {
 	/** The reactive state, initialized through `super({ ... })`. */
 	declare readonly state: T;
 
@@ -107,8 +107,10 @@ export interface TemplesComponentClass {
   concrete instance's typed state against `Record<string, unknown>` would reject author-declared
   interfaces (`ShoppingItemData` has no implicit index signature). No boundary consumer reads
   instance state, so `HTMLElement` is the honest view.
-- `T` stays **unconstrained**. A constraint such as `T extends Record<string, unknown>` is
-  checked at the `extends` clause and would reject interface-typed state the same way.
+- `T` is bounded by `object`, not by `Record<string, unknown>`. The `reactive()` call in the
+  constructor needs an object. The `object` bound is safe for interfaces and type aliases,
+  because it requires no index signature. A `Record<string, unknown>` bound would check the
+  implicit index signature at the `extends` clause and reject interface-typed state.
 
 Author state types:
 
@@ -118,10 +120,11 @@ Author state types:
 - The TypeScript limitation behind the two boundary choices above: TypeScript grants an
   implicit index signature to type aliases and anonymous object types only, never to
   interfaces (interfaces stay open to declaration merging). An interface is therefore not
-  assignable to `Record<string, unknown>`. Constraining `T`, or letting the boundary construct
-  signature return a state-carrying type, would surface that limitation at author call sites
-  and break interfaces. The proposed design never compares author state against
-  `Record<string, unknown>`.
+  assignable to `Record<string, unknown>`. A `Record<string, unknown>` bound on `T`, or a
+  state-carrying return type on the boundary construct signature, would surface that limitation
+  at author call sites and break interfaces. The proposed design never compares author state
+  against `Record<string, unknown>`; the only bound is `object`, which every interface
+  satisfies.
 
 Internal implementation details (not author-facing):
 

@@ -15,11 +15,11 @@ only, and the example app becomes the DX proof with zero casts.
 - `T` is the complete state shape (attributes plus internal values), declared on the
   `extends` clause. The constructor accepts the typed initial literal: `constructor(state:
   T = {} as T)`. The default keeps untyped components and every internal reference working.
-- `T` is unconstrained. A constraint (`T extends Record<string, unknown>`) is checked at the
-  `extends` clause and rejects author-declared interfaces, which lack implicit index signatures
-  (`ShoppingItemData` in `example/types.ts` is an interface). Both `interface` and `type`
-  author declarations work in the proposed design, because no author-facing code path compares
-  the author state against `Record<string, unknown>`.
+- `T` is bounded by `object` (the constructor passes the state to `reactive()`, which needs an
+  object), never by `Record<string, unknown>`. The `object` bound accepts interfaces and type
+  aliases alike because it requires no index signature. Both `interface` and `type` author
+  declarations work in the proposed design, because no author-facing code path compares the
+  author state against `Record<string, unknown>`.
 - `TemplesComponentClass` describes the constructor object: the mutable statics plus
   `new (...args: never[]): HTMLElement`. `never[]` accepts every subclass constructor
   parameter list (the assignability fix), and the `HTMLElement` return avoids comparing typed
@@ -32,6 +32,9 @@ only, and the example app becomes the DX proof with zero casts.
   `connectedCallback`/`attributeChangedCallback` use
   `(this.state as Record<string, unknown>)[name]`, and `rerender` casts the state to
   `TemplesData` for the engine. These are library-internal, never author-facing.
+- Implementation order note: the boundary landed before the generic (the reverse of the task
+  numbering). The typed runtime test registers through `define()`, so the boundary had to exist
+  first for every slice to stay compilable.
 - `EventHandler` stays non-generic: authors write real class methods, never `EventHandler`
   values.
 
@@ -41,7 +44,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Phase 1: Core types
 
-- [ ] **Task 1: Generic `TemplesComponent<T>` + type-level tests**
+- [x] **Task 1: Generic `TemplesComponent<T>` + type-level tests**
   - Acceptance: the class, `state`, and the constructor are generic. `@ts-expect-error` tests
     prove that a wrong-shape `super({ wrong: true })` literal and a wrong-type
     `this.state.count = "text"` assignment are compile errors (write them first, TDD). Existing
@@ -51,7 +54,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
     `packages/components/src/component.test.ts`
   - Depends: None
 
-- [ ] **Task 2: `TemplesComponentClass` boundary + `define()` compatibility**
+- [x] **Task 2: `TemplesComponentClass` boundary + `define()` compatibility**
   - Acceptance: the interface is exported and documents the statics plus the
     `new (...args: never[]): HTMLElement` signature. `define()` and the private statics take
     the boundary type. A test proves `define()` accepts a concrete typed subclass, and
@@ -63,20 +66,21 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Checkpoint: Core types
 
-- [ ] `bun run typecheck` passes with the example still on its temporary casts
-- [ ] `bun test packages/components` passes unchanged
+- [x] `bun run typecheck` passes with the example still on its temporary casts
+- [x] `bun test packages/components` passes unchanged
 
 ### Phase 2: Consumers
 
-- [ ] **Task 3: SSR boundary + typed SSR test classes**
+- [x] **Task 3: SSR boundary + typed SSR test classes**
   - Acceptance: `PrepareOptions.templesComponents`, `componentStyles`, and
-    `unwrapComponents` use the boundary type. The SSR test classes gain type arguments where
-    they carry state. SSR output stays identical.
+    `unwrapComponents` use the boundary type, which also carries the class-form `define()`.
+    The SSR test classes compile unchanged (they carry no typed state) and the SSR output
+    stays identical.
   - Verify: `bun test packages/ssr`
-  - Files: `packages/ssr/src/ssr.ts`, `packages/ssr/src/ssr.test.ts`
+  - Files: `packages/ssr/src/ssr.ts`
   - Depends: Task 2
 
-- [ ] **Task 4: Example migration — the DX proof**
+- [x] **Task 4: Example migration — the DX proof**
   - Acceptance: the three components declare `T` (`ShoppingItemData`, the app state with
     `isEmpty()`, the vault state) and pass typed literals to `super()`. No state cast remains:
     `snapshot()` returns `ShoppingItemData` without a cast, list mutations are typed. The
@@ -88,12 +92,12 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Checkpoint: Consumers
 
-- [ ] `rg "as ShoppingItemData" example/components/` returns nothing
-- [ ] Example works in the browser
+- [x] `rg "as ShoppingItemData" example/components/` returns nothing
+- [x] Example works in the browser
 
 ### Phase 3: Docs and gate
 
-- [ ] **Task 5: Typed docs**
+- [x] **Task 5: Typed docs**
   - Acceptance: `README.md`, `components.md`, and `api-reference.md` show the typed
     declaration (`extends TemplesComponent<T>`), and the api-reference documents the `T`
     parameter and the `TemplesComponentClass` interface. No doc shows a state cast.
@@ -102,7 +106,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
     `packages/docs/content/api-reference.md`
   - Depends: Task 4
 
-- [ ] **Task 6: Full verification**
+- [x] **Task 6: Full verification**
   - Acceptance: the full gate passes. Every docs snippet matches the implementation. The spec
     and the plan stay accurate.
   - Verify: `bun run check && bun run typecheck && bun test && bun run build:docs`
@@ -111,8 +115,8 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Checkpoint: Complete
 
-- [ ] All acceptance criteria met
-- [ ] Ticket committed, ready for implementation
+- [x] All acceptance criteria met
+- [x] Ticket committed, ready for implementation
 
 ## Risks and Mitigations
 
