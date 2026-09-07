@@ -54,10 +54,23 @@ bound value. See [Data-binding syntax](binding-syntax.html) for the attribute re
 
 Base class for declarative Web Components. Inherit from it instead of `HTMLElement`.
 
+**Class**
+
+```typescript
+class TemplesComponent<T extends object = Record<string, unknown>> extends HTMLElement {
+    readonly state: T;          // reactive proxy, initialized through super({ ... })
+    constructor(state?: T);
+}
+```
+
+`T` is the complete state shape: the observed attributes plus every internal value. The subclass
+declares it on the `extends` clause, and every `state` access is typed. An `interface` or a
+`type` alias both work as the shape.
+
 **Define**
 
 ```typescript
-TemplesComponent.define(tagName: string, componentClass: typeof TemplesComponent, options: DefineOptions): void;
+TemplesComponent.define(tagName: string, componentClass: TemplesComponentClass, options: DefineOptions): void;
 ```
 
 ```typescript
@@ -83,7 +96,7 @@ A class that declares its own `observedAttributes` or `attributeTypes` statics, 
 
 | Member | Description |
 |--------|-------------|
-| `state` | The reactive state object, initialized through `super({ ... })` in the subclass constructor: attributes coerced by the `attributes` types, plus any internal values. Any mutation re-renders. |
+| `state` | The reactive state object, typed by the `TemplesComponent<T>` parameter and initialized through `super({ ... })` in the subclass constructor: attributes coerced by the `attributes` types, plus any internal values. Any mutation re-renders. |
 | `emit(name, detail?)` | Emits an inter-component message, delivered as `"<tag>:<name>"` on the shared bus. |
 | `on(events)` | Merges additional bindings at runtime, same map format as the `events` option. |
 
@@ -94,8 +107,24 @@ type AttributeType = "boolean" | "number" | "json" | "string";
 
 type EventMap = Record<string, string>;
 
-type EventHandler = (this: TemplesComponent, event: Event) => void;
+type EventHandler = (this: TemplesComponent<object>, event: Event) => void;
+
+interface TemplesComponentClass {
+    tag: string;
+    template: string;
+    css: string;
+    events: EventMap;
+    observedAttributes: string[];
+    attributeTypes: Record<string, AttributeType>;
+    globalStore?: TemplesData;
+    define(options?: { globalStore?: TemplesData }): void;
+    new (...args: never[]): HTMLElement;
+}
 ```
+
+`TemplesComponentClass` is the boundary type for any subclass constructor, whatever state type
+its instances carry. `define()` and the SSR `templesComponents` option accept it, so a
+heterogeneous list of component classes needs no cast.
 
 ### `@temples/components/reactive`
 
@@ -116,7 +145,7 @@ function:
 ```typescript
 const render: (data: TemplesData) => Promise<string> = await prepare(source, {
     removeDataBindings?: boolean;   // default true
-    templesComponents?: (typeof TemplesComponent)[];
+    templesComponents?: TemplesComponentClass[];
     rehydrate?: boolean;            // reserved
 });
 ```

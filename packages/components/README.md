@@ -54,6 +54,22 @@ TemplesComponent.define("flipping-card", FlippingCard, {
   bindings.
 - Attributes on the tag are the single source of truth; the optional `globalStore` option seeds
   attributes that the tag does not set.
+- In TypeScript, the class declares its complete state shape with the `TemplesComponent<T>`
+  parameter. The compiler types every `state` access, and the initial `super({ ... })` literal is
+  checked against the shape:
+
+  ```typescript
+  interface CardState {
+      title: string;
+      flipped: boolean;
+  }
+
+  export class FlippingCard extends TemplesComponent<CardState> {
+      constructor() {
+          super({ title: "", flipped: false });
+      }
+  }
+  ```
 
 ### Events and messaging
 

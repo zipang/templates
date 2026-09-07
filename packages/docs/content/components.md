@@ -86,6 +86,26 @@ and the state becomes a deep reactive proxy at construction:
   written into `state`.
 - Changing an attribute (`card.setAttribute("flipped", "true")`) updates `state` and re-renders.
 - Mutating `state` (`this.state.flipped = true`) re-renders the component's bindings.
+
+In TypeScript, the class declares its complete state shape with the `TemplesComponent<T>`
+parameter — the observed attributes plus every internal value. The initial `super({ ... })`
+literal and every `state` access are then checked:
+
+```typescript
+type FlippingCardState = {
+    title: string;
+    flipped: boolean;
+};
+
+export class FlippingCard extends TemplesComponent<FlippingCardState> {
+    constructor() {
+        super({ title: "", flipped: false });
+    }
+}
+```
+
+An `interface` or a `type` alias both work as the state shape. Message payloads stay `unknown`
+at the bus boundary; narrow them with a type guard before use.
 - The optional `globalStore` option seeds the attributes the tag does not set:
   `globalStore: { title: "Default" }` in the define call. An explicit attribute on the tag
   always wins over the store.

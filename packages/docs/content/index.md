@@ -4,18 +4,17 @@ description: Declarative HTML templates rendered by a DOM-based engine, in the b
 order: 0
 ---
 
-# Temples
+# @temples
 
-`Temples` (templ*at*es that you won't hate) is a templating system for HTML.
+`@temples` or `templ(at)es` are templates for HTML that you won't hate.
 
-- Templates are **plain HTML** decorated with a few `data-bind` attributes — your IDE and your
-  designers recognize everything.
-- The engine is **DOM-based and declarative**, with real-time partial updates of single values.
+- Templates are **plain valide HTML markup** where any HTML tag is simply decorated with a few `data-bind` attributes: — your IDE and your designers recognize them instantly.
+- The engine is **DOM-based and purely declarative**, with real-time partial updates of single values.
 - The same templates render **in the browser and on the server** (SSR and static site generation).
-- Components are **Web Components** without a framework: inherit from `TemplesComponent`, declare
-  static fields, and the template, state, and events wire themselves.
+- Components are **Web Components** without a framework: just create a class that inherits from `TemplesComponent`,
+  declare static fields, and the template, state, and events wire themselves.
 
-This documentation site is itself built with Temples: the markdown sources in
+This documentation site is itself built with `@temples`: the markdown sources in
 `packages/docs/content/` are rendered through the layout by `@temples/ssr`. Every page you read
 here is dogfood.
 
@@ -37,6 +36,6 @@ here is dogfood.
 
 ## For AI coding agents
 
-An [`llms.txt`](https://zipang.github.io/Temples/llms.txt) index of this site is generated at
+An [`llms.txt`](https://zipang.github.io/temples/llms.txt) index of this site is generated at
 build time. Point your agent at it, or read the markdown sources directly in
 `packages/docs/content/`.
