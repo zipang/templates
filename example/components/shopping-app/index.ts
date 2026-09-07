@@ -1,7 +1,17 @@
 import { TemplesComponent } from "@temples/components";
-import type { ShoppingItemData } from "../../types.ts";
+import { isShoppingItemData, type ShoppingItemData } from "../../types.ts";
 import template from "./shopping-app.html" with { type: "text" };
 import "./shopping-app.css";
+
+/**
+ * The complete state shape of the app: the `title` attribute, the shared list,
+ * and the `isEmpty` helper the template calls.
+ */
+type ShoppingAppState = {
+	title: string;
+	items: ShoppingItemData[];
+	isEmpty(): boolean;
+};
 
 /**
  * The root of the shopping list, owning the shared list of items.
@@ -11,24 +21,15 @@ import "./shopping-app.css";
  * `created` on add, and subscribes to `shopping-item:updated`,
  * `shopping-item:removed`, and `shopping-vault:recalled`.
  */
-export class ShoppingApp extends TemplesComponent {
+export class ShoppingApp extends TemplesComponent<ShoppingAppState> {
 	constructor() {
-		const state = {
+		super({
 			title: "",
-			items: [] as ShoppingItemData[],
+			items: [],
 			isEmpty() {
 				return this.items.length === 0;
 			}
-		};
-
-		super(state);
-	}
-
-	/**
-	 * The active list, read from the untyped reactive state.
-	 */
-	private get items(): ShoppingItemData[] {
-		return this.state.items as ShoppingItemData[];
+		});
 	}
 
 	/**
@@ -45,7 +46,7 @@ export class ShoppingApp extends TemplesComponent {
 
 		const item: ShoppingItemData = { id: crypto.randomUUID(), label, checked: false };
 
-		this.items.push(item);
+		this.state.items.push(item);
 		this.emit("created", item);
 
 		// RAZ and refocus
@@ -57,8 +58,10 @@ export class ShoppingApp extends TemplesComponent {
 	 * Apply an updated item to the matching entry.
 	 */
 	updateItem(evt: CustomEvent): void {
-		const item = evt.detail as ShoppingItemData;
-		const existing = this.items.find((entry) => entry.id === item.id);
+		if (!isShoppingItemData(evt.detail)) return;
+
+		const item = evt.detail;
+		const existing = this.state.items.find((entry) => entry.id === item.id);
 
 		if (existing === undefined) return;
 
@@ -70,16 +73,18 @@ export class ShoppingApp extends TemplesComponent {
 	 * Drop the removed item from the active list.
 	 */
 	removeItem(evt: CustomEvent): void {
-		const item = evt.detail as ShoppingItemData;
+		if (!isShoppingItemData(evt.detail)) return;
 
-		this.state.items = this.items.filter((entry) => entry.id !== item.id);
+		this.state.items = this.state.items.filter((entry) => entry.id !== evt.detail.id);
 	}
 
 	/**
 	 * Restore a recalled item back into the active list.
 	 */
 	recallItem(evt: CustomEvent): void {
-		this.items.push(evt.detail as ShoppingItemData);
+		if (!isShoppingItemData(evt.detail)) return;
+
+		this.state.items.push(evt.detail);
 	}
 }
 

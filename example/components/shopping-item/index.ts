@@ -4,6 +4,17 @@ import template from "./shopping-item.html" with { type: "text" };
 import "./shopping-item.css";
 
 /**
+ * The complete state shape of a shopping item: the observed attributes from
+ * the `attributes` map, plus the internal editor flag and the two computed
+ * helpers the template calls.
+ */
+type ShoppingItemState = ShoppingItemData & {
+	editing: boolean;
+	checkedClass(): string;
+	notEditing(): boolean;
+};
+
+/**
  * A single shopping list entry, configured through plain attributes.
  *
  * `id`, `label`, and `checked` are observed attributes declared in the
@@ -12,7 +23,7 @@ import "./shopping-item.css";
  * mutates the shared list directly: it emits `updated` and `removed` messages
  * carrying the full item, and the app owns the data.
  */
-export class ShoppingItem extends TemplesComponent {
+export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 	constructor() {
 		super({
 			id: "",
@@ -67,13 +78,9 @@ export class ShoppingItem extends TemplesComponent {
 	 * Build the plain data payload carried by every message.
 	 */
 	private snapshot(): ShoppingItemData {
-		const state = this.state;
+		const { id, label, checked } = this.state;
 
-		return {
-			id: state.id as string,
-			label: state.label as string,
-			checked: state.checked as boolean
-		};
+		return { id, label, checked };
 	}
 }
 

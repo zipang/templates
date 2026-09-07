@@ -9,3 +9,20 @@ export interface ShoppingItemData {
 	label: string;
 	checked: boolean;
 }
+
+/**
+ * Check that a message payload is a shopping list item.
+ *
+ * Message details are `unknown` at the bus boundary. This guard narrows the
+ * payload before the receiving component touches it, so the data flows on
+ * typed without a cast.
+ *
+ * @param value - The message payload to check.
+ * @returns True when the payload carries the three item fields.
+ */
+export const isShoppingItemData = (value: unknown): value is ShoppingItemData =>
+	typeof value === "object" &&
+	value !== null &&
+	"id" in value &&
+	"label" in value &&
+	"checked" in value;

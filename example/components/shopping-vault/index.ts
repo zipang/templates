@@ -1,7 +1,16 @@
 import { TemplesComponent } from "@temples/components";
-import type { ShoppingItemData } from "../../types.ts";
+import { isShoppingItemData, type ShoppingItemData } from "../../types.ts";
 import template from "./shopping-vault.html" with { type: "text" };
 import "./shopping-vault.css";
+
+/**
+ * The complete state shape of the vault: the collected items and the
+ * `isEmpty` helper the template calls.
+ */
+type ShoppingVaultState = {
+	vaultItems: ShoppingItemData[];
+	isEmpty(): boolean;
+};
 
 /**
  * A holding place for removed items, with a way to bring them back.
@@ -10,16 +19,14 @@ import "./shopping-vault.css";
  * Each entry exposes a recall button that emits `recalled`, which the app uses
  * to restore the item into the active list.
  */
-export class ShoppingVault extends TemplesComponent {
+export class ShoppingVault extends TemplesComponent<ShoppingVaultState> {
 	constructor() {
-		const state = {
-			vaultItems: [] as ShoppingItemData[],
+		super({
+			vaultItems: [],
 			isEmpty() {
 				return this.vaultItems.length === 0;
 			}
-		};
-
-		super(state);
+		});
 	}
 
 	static override events = {
@@ -31,9 +38,9 @@ export class ShoppingVault extends TemplesComponent {
 	 * Collect a removed item into the vault.
 	 */
 	onRemoved(evt: CustomEvent): void {
-		const items = this.state.vaultItems as ShoppingItemData[];
+		if (!isShoppingItemData(evt.detail)) return;
 
-		items.push(evt.detail as ShoppingItemData);
+		this.state.vaultItems.push(evt.detail);
 	}
 
 	/**
@@ -45,12 +52,11 @@ export class ShoppingVault extends TemplesComponent {
 
 		if (id === null || id === undefined) return;
 
-		const items = this.state.vaultItems as ShoppingItemData[];
-		const item = items.find((entry) => entry.id === id);
+		const item = this.state.vaultItems.find((entry) => entry.id === id);
 
 		if (item === undefined) return;
 
-		this.state.vaultItems = items.filter((entry) => entry.id !== id);
+		this.state.vaultItems = this.state.vaultItems.filter((entry) => entry.id !== id);
 		this.emit("recalled", item);
 	}
 }
