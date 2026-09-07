@@ -54,35 +54,38 @@ bound value. See [Data-binding syntax](binding-syntax.html) for the attribute re
 
 Base class for declarative Web Components. Inherit from it instead of `HTMLElement`.
 
-**Static fields**
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `tag` | `string` | The custom element tag name (must contain a hyphen). |
-| `template` | `string` | The HTML template string, parsed once per class. |
-| `css` | `string` | Optional stylesheet text, used by SSR output. |
-| `events` | `EventMap` | Declarative bindings: `"<eventType> <selector>"` for DOM events, `"<tag>:<message>"` for inter-component messages. Values are handler method names. |
-| `observedAttributes` | `string[]` | Plain attribute names that flow into `state`. |
-| `attributeTypes` | `Record<string, AttributeType>` | Coercion per attribute. |
-
-**Static methods**
+**Define**
 
 ```typescript
-TemplesComponent.define(options?: { globalStore?: TemplesData }): void;
 TemplesComponent.define(tagName: string, componentClass: typeof TemplesComponent, options: DefineOptions): void;
 ```
 
-The first form registers the subclass itself from its static fields. The second registers an
-explicit tag and class with `{ template, events?, css?, globalStore? }`. Both parse the template
-once, register the event types, and call `customElements.define()`.
+```typescript
+interface DefineOptions {
+    template: string;                              // required
+    attributes?: Record<string, AttributeType>;    // observed attributes, name to coercion type
+    events?: EventMap;                             // bindings, see the components guide
+    css?: string;                                  // stylesheet text for the SSR output
+    globalStore?: TemplesData;                     // seeds attributes the tag does not set
+}
+```
+
+`define()` is the one way to register a component. The class carries its `state` and handler
+methods. The options carry the `template`, the `attributes` map, the `events`, the `css`, and the
+`globalStore`. The `attributes` map derives the class `observedAttributes` and `attributeTypes`
+statics, which stay internal. `define()` parses the template once, registers the event types, and
+calls `customElements.define()`.
+
+A class that declares its own `observedAttributes` or `attributeTypes` statics, and also passes
+`attributes`, makes `define()` throw.
 
 **Instance members**
 
 | Member | Description |
 |--------|-------------|
-| `state` | The reactive state object: attributes coerced by `attributeTypes`, plus any internal values. Any mutation re-renders. |
+| `state` | The reactive state object: attributes coerced by the `attributes` types, plus any internal values. Any mutation re-renders. |
 | `emit(name, detail?)` | Emits an inter-component message, delivered as `"<tag>:<name>"` on the shared bus. |
-| `on(events)` | Merges additional bindings at runtime, same map format as `static events`. |
+| `on(events)` | Merges additional bindings at runtime, same map format as the `events` option. |
 
 **Types**
 

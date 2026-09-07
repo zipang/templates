@@ -14,7 +14,8 @@ bun add @temples/components
 
 ## Usage
 
-Declare a component with static fields, then register it with `define()`:
+Declare a component with `TemplesComponent.define()`. The class carries the state and the handler
+methods. The define call carries the template, the attributes, and the event bindings:
 
 ```javascript
 import { TemplesComponent } from "@temples/components";
@@ -22,16 +23,7 @@ import template from "./flipping-card.html" with { type: "text" };
 import "./flipping-card.css";
 
 export class FlippingCard extends TemplesComponent {
-    static tag = "flipping-card";
-    static template = template;
-    static observedAttributes = ["title", "flipped"];
-    static attributeTypes = { flipped: "boolean" };
-
-    // DOM events ("type selector") and inter-component messages ("tag:message")
-    static events = {
-        "click .flip-btn": "flip",
-        "shopping-item:updated": "onUpdated",
-    };
+    state = { flipped: false };
 
     flip() {
         this.state.flipped = true; // reactive: mutation re-renders
@@ -42,27 +34,28 @@ export class FlippingCard extends TemplesComponent {
     }
 }
 
-FlippingCard.define();
-```
-
-The same registration works in the explicit form:
-
-```javascript
-TemplesComponent.define("flipping-card", FlippingCard, { template });
+TemplesComponent.define("flipping-card", FlippingCard, {
+    template,
+    attributes: { title: "string", flipped: "boolean" },
+    events: {
+        "click .flip-btn": "flip",
+        "shopping-item:updated": "onUpdated",
+    },
+});
 ```
 
 ### State and reactivity
 
-- Observed attributes flow into `this.state`, coerced by `static attributeTypes`
-  (`"string" | "boolean" | "number" | "json"`).
+- Each name in the `attributes` map is an observed attribute. It flows into `this.state`, coerced
+  by its declared type (`"string" | "boolean" | "number" | "json"`).
 - `this.state` is a deep reactive proxy: any mutation triggers a re-render of the component's
   bindings.
-- Attributes on the tag are the single source of truth; the optional `define({ globalStore })`
-  seeds attributes that the tag does not set.
+- Attributes on the tag are the single source of truth; the optional `globalStore` option seeds
+  attributes that the tag does not set.
 
 ### Events and messaging
 
-- `static events` maps bindings to handler method names. Handlers run with `this` bound to the
+- The `events` option maps bindings to handler method names. Handlers run with `this` bound to the
   component instance and receive the event.
 - A binding with a space (`"click .flip-btn"`) is a delegated DOM event inside the component.
 - A binding without a space (`"shopping-item:updated"`) is an inter-component message delivered
