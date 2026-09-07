@@ -7,7 +7,7 @@ description: Breaks work into ordered tasks. Use when you have a spec or clear r
 
 ## Overview
 
-Decompose work into small, verifiable tasks with explicit acceptance criteria. Good task breakdown is the difference between an agent that completes work reliably and one that produces a tangled mess. Every task should be small enough to implement, test, and verify in a single focused session.
+Decompose work into small, verifiable tasks with explicit acceptance criteria. Good task breakdown is the difference between an agent that completes work reliably and one that produces a tangled mess. Every task should be small enough to implement, test, and verify in a single focused session. Every breakdown belongs to a **Ticket** — an isolated unit of planned work stored in `roadmap/TXXXX/` (see the Glossary in the root `README.md`).
 
 ## When to Use
 
@@ -30,7 +30,7 @@ Before writing any code, operate in read-only mode:
 - Map dependencies between components
 - Note risks and unknowns
 
-**Do NOT write code during planning.** The output is a plan document saved to `tasks/plan.md` and a task list saved to `tasks/todo.md`, not implementation.
+**Do NOT write code during planning.** The output is a plan document saved to `roadmap/TXXXX/plan.md`, inside the feature's Ticket directory. The plan carries the implementation plan and the task list, not implementation.
 
 ### Step 2: Identify the Dependency Graph
 
@@ -142,15 +142,16 @@ If a task is L or larger, it should be broken into smaller tasks. An agent perfo
 
 ## Output Files
 
-- **Plan document:** Save the implementation plan to `tasks/plan.md`.
-- **Task list:** Save the checklist-style task list to `tasks/todo.md`.
+All outputs live inside the feature's Ticket directory (`roadmap/TXXXX/`):
 
-Create the `tasks/` directory if it does not exist. These paths are the convention expected by the `/build` command and other downstream tooling.
+- **Plan document:** Save the implementation plan and its task list to `roadmap/TXXXX/plan.md`. The plan's "Task List" section is the markdown TODO list: one checkbox per task, with its acceptance criteria, verification, and files beneath.
+
+If no Ticket exists yet, allocate the next sequential ID (`T0001`–`T9999`) by scanning `roadmap/` for existing `T\d{4}` directories, and create `roadmap/TXXXX/`. If the user provided a Ticket ID or the spec lives in one, reuse it. These paths are the convention expected by the `/implement` command and other downstream tooling.
 
 ## Plan Document Template
 
 ```markdown
-# Implementation Plan: [Feature/Project Name]
+# Implementation Plan: [TXXXX] [Feature/Project Name]
 
 ## Overview
 [One paragraph summary of what we're building]
@@ -161,23 +162,33 @@ Create the `tasks/` directory if it does not exist. These paths are the conventi
 
 ## Task List
 
+The Task List section is the markdown TODO list — one checkbox per task:
+
 ### Phase 1: Foundation
-- [ ] Task 1: ...
-- [ ] Task 2: ...
+
+- [ ] **Task 1: ...**
+  - Acceptance: [Specific, testable conditions]
+  - Verify: [Focused test command, build, manual check]
+  - Files: [Files touched]
+  - Depends: [Task numbers, or None]
+
+- [ ] **Task 2: ...**
 
 ### Checkpoint: Foundation
 - [ ] Tests pass, builds clean
 
 ### Phase 2: Core Features
-- [ ] Task 3: ...
-- [ ] Task 4: ...
+
+- [ ] **Task 3: ...**
+- [ ] **Task 4: ...**
 
 ### Checkpoint: Core Features
 - [ ] End-to-end flow works
 
 ### Phase 3: Polish
-- [ ] Task 5: ...
-- [ ] Task 6: ...
+
+- [ ] **Task 5: ...**
+- [ ] **Task 6: ...**
 
 ### Checkpoint: Complete
 - [ ] All acceptance criteria met
@@ -220,7 +231,7 @@ When multiple agents or sessions are available:
 
 ## Verification
 
-Before starting implementation, confirm:
+_Before_ starting implementation, confirm:
 
 - [ ] Every task has acceptance criteria
 - [ ] Every task has a verification step
@@ -228,6 +239,7 @@ Before starting implementation, confirm:
 - [ ] No task touches more than ~5 files
 - [ ] Checkpoints exist between major phases
 - [ ] The human has reviewed and approved the plan
+- [ ] The new Ticket has been commited
 
 ## See Also
 

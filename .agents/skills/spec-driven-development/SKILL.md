@@ -9,6 +9,8 @@ description: Creates specs before coding. Use when starting a new project, featu
 
 Write a structured specification before writing any code. The spec is the shared source of truth between you and the human engineer — it defines what we're building, why, and how we'll know it's done. Code without a spec is guessing.
 
+Every spec belongs to a **Ticket**: an isolated unit of planned work identified by a sequential ID (`T0001`–`T9999`) and stored in its own directory under `roadmap/`. See the Glossary in the root `README.md`.
+
 ## When to Use
 
 - Starting a new project or feature
@@ -33,6 +35,24 @@ SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
 
 ### Phase 1: Specify
 
+#### Allocate the Ticket ID first
+
+Before writing any spec content, allocate the Ticket ID:
+
+1. List `roadmap/` for existing ticket directories matching `T\d{4}`.
+2. Take the next sequential ID (`T0001`–`T9999`); create `roadmap/TXXXX/`.
+3. State the Ticket ID and title at the top of every artifact produced for this feature.
+
+If the user provided a Ticket ID, reuse it — never renumber or skip IDs.
+
+All spec artifacts live inside the ticket directory:
+
+```
+roadmap/TXXXX/
+├── spec.md   ← this phase
+└── plan.md   ← phase 2 (plan + task checklist)
+```
+
 Start with a high-level vision. Ask the human clarifying questions until requirements are concrete.
 
 **Surface assumptions immediately.** Before writing any spec content, list what you're assuming:
@@ -54,10 +74,10 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 
 2. **Commands** — Full executable commands with flags, not just tool names.
    ```
-   Build: npm run build
-   Test: npm test -- --coverage
-   Lint: npm run lint --fix
-   Dev: npm run dev
+   Build: bun run build
+   Test: bun test -- --coverage
+   Lint: bun run lint
+   Dev: bun run dev
    ```
 
 3. **Project Structure** — Where source code lives, where tests go, where docs belong.
@@ -65,8 +85,6 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
    src/           → Application source code
    src/components → React components
    src/lib        → Shared utilities
-   tests/         → Unit and integration tests
-   e2e/           → End-to-end tests
    docs/          → Documentation
    ```
 
@@ -82,7 +100,7 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 **Spec template:**
 
 ```markdown
-# Spec: [Project/Feature Name]
+# Spec: [TXXXX] [Project/Feature Name]
 
 ## Objective
 [What we're building and why. User stories or acceptance criteria.]
@@ -140,7 +158,7 @@ With the validated spec, generate a technical implementation plan:
 
 > Follow `planning-and-task-breakdown` for the dependency-graph mapping and vertical-slicing mechanics behind these steps; it is the canonical source. The bullets above are a lightweight summary; if they ever diverge, `planning-and-task-breakdown` takes precedence.
 >
-> **Output convention:** Save the plan to `tasks/plan.md` and the task list to `tasks/todo.md`, per the `/plan` command convention. Create `tasks/` if it does not exist. Downstream commands (`/build`, etc.) expect these paths.
+> **Output convention:** Save the plan and its task checklist to `roadmap/TXXXX/plan.md`, inside the feature's Ticket directory. Create the ticket directory if it does not exist. Downstream commands (`/implement`, etc.) load context from this path.
 
 The plan should be reviewable: the human should be able to read it and say "yes, that's the right approach" or "no, change X."
 
@@ -175,7 +193,7 @@ The spec is a living document, not a one-time artifact:
 - **Update when decisions change** — If you discover the data model needs to change, update the spec first, then implement.
 - **Update when scope changes** — Features added or cut should be reflected in the spec.
 - **Commit the spec** — The spec belongs in version control alongside the code.
-- **Reference the spec in PRs** — Link back to the spec section that each PR implements.
+- **Reference the Ticket in PRs** — Mention the Ticket ID (`TXXXX`) and link back to the spec section that each PR implements.
 
 ## Common Rationalizations
 
@@ -203,4 +221,4 @@ Before proceeding to implementation, confirm:
 - [ ] The human has reviewed and approved the spec
 - [ ] Success criteria are specific and testable
 - [ ] Boundaries (Always/Ask First/Never) are defined
-- [ ] The spec is saved to a file in the repository
+- [ ] The spec is saved to `roadmap/TXXXX/spec.md` inside the Ticket directory

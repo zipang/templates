@@ -1,6 +1,6 @@
 ---
 name: git-commit
-description: Create well-formatted commits with conventional commit messages and emoji. Use when the user asks to commit changes, run the /commit command, or says "commit my changes". Each commit is atomic and uses a conventional message (<emoji> <type>: <description>). Confirms every commit with the question tool before executing.
+description: Create well-formatted commits with conventional commit messages and emoji. Use when the user asks to commit changes, run the /commit command, or says "commit my changes". Confirms every commit with the question tool before executing.
 ---
 
 # Git Commit
@@ -46,7 +46,7 @@ You are an AI agent that helps create well-formatted git commits with convention
      "questions": [
        {
          "header": "Commit confirmation",
-         "question": "Commit README.md, tasks/plan.md, tasks/todo.md with the following message:",
+          "question": "Commit README.md, roadmap/T0001/plan.md with the following message:",
          "options": [
            {
              "label": "(default) 📝 docs: revise plan around standalone engine and SSR entry",
@@ -59,12 +59,12 @@ You are an AI agent that helps create well-formatted git commits with convention
    ```
 
    - If the user confirms the default option, run the commit as proposed.
-   - If the user types their own message, use it as the commit message, then run the commit.
+   - If the user types their own message, use it as the commit message (adding the emoji and standard commit type if they are missing), then run the commit.
 
-6. **Execute the commit**:
+6. **Execute the commit and push**:
    - **ONLY** after the `question` tool confirms the commit, run `git commit -m "<message>"`.
-   - Run `git push` if part of the approved plan.
    - Display the commit hash and success message.
+   - Run `git push` if part of the approved plan or ask the user confirmation to push after each commits have been done.
 
 ## Commit Message Reference
 
