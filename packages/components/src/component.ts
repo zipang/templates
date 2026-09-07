@@ -18,7 +18,7 @@ export type AttributeType = "boolean" | "number" | "json" | "string";
  * (`"tag:name"` binding). It runs with `this` bound to the component instance,
  * so handlers can read `this.state` and call other component methods directly.
  */
-export type EventHandler = (this: TemplesComponent, event: Event) => void;
+export type EventHandler = (this: TemplesComponent<object>, event: Event) => void;
 
 /**
  * Declarative map of event bindings.
@@ -118,6 +118,14 @@ export interface TemplesComponentClass {
 	globalStore?: TemplesData;
 
 	/**
+	 * Register the class through the class form. The SSR pipeline uses it to
+	 * register a fresh subclass per render window.
+	 *
+	 * @param options - The global data store shared by every component.
+	 */
+	define(options?: { globalStore?: TemplesData }): void;
+
+	/**
 	 * Create a component instance. `never[]` accepts any subclass constructor
 	 * parameter list.
 	 */
@@ -131,7 +139,7 @@ export interface TemplesComponentClass {
  * the handler with `this` bound to the owning component.
  */
 interface MessageSubscription {
-	component: TemplesComponent;
+	component: TemplesComponent<object>;
 	handler: EventHandler;
 }
 
@@ -184,8 +192,13 @@ const dispatchMessage = (type: string, detail: unknown): void => {
  * the `observedAttributes` and `attributeTypes` statics from the `attributes`
  * map, and registers the custom element. On connection the state is rendered
  * from the template, and any state mutation re-renders.
+ *
+ * @template T - The complete state shape: the observed attributes plus every
+ * internal value. Declared on the `extends` clause. The `object` bound accepts
+ * every interface and type alias; the default keeps untyped components
+ * working.
  */
-export class TemplesComponent extends HTMLElement {
+export class TemplesComponent<T extends object = Record<string, unknown>> extends HTMLElement {
 	/**
 	 * The custom element tag name, e.g. `"todo-app"`.
 	 */
@@ -243,7 +256,7 @@ export class TemplesComponent extends HTMLElement {
 	 * component once it is connected. The property is defined by the
 	 * constructor, non-writable and non-configurable.
 	 */
-	declare readonly state: Record<string, unknown>;
+	declare readonly state: T;
 
 	private renderer: Renderer | null = null;
 	private unsubscribeState: (() => void) | null = null;
@@ -272,9 +285,10 @@ export class TemplesComponent extends HTMLElement {
 	 * subclass that redeclares it as a class field breaks at construction
 	 * instead of silently replacing the reactive proxy.
 	 *
-	 * @param state - The initial state values.
+	 * @param state - The initial state values, shaped by the subclass state
+	 * type `T`.
 	 */
-	constructor(state: Record<string, unknown> = {}) {
+	constructor(state: T = {} as T) {
 		super();
 		Object.defineProperty(this, "state", {
 			value: reactive(state),
@@ -460,7 +474,7 @@ export class TemplesComponent extends HTMLElement {
 	 * @param event - The event whose target to resolve.
 	 * @returns The closest component ancestor, or null.
 	 */
-	private static resolveComponent(event: Event): TemplesComponent | null {
+	private static resolveComponent(event: Event): TemplesComponent<object> | null {
 		for (const node of event.composedPath()) {
 			if (node instanceof TemplesComponent) return node;
 		}
@@ -483,7 +497,7 @@ export class TemplesComponent extends HTMLElement {
 	private static matchesSelector(
 		event: Event,
 		selector: string,
-		component: TemplesComponent
+		component: TemplesComponent<object>
 	): boolean {
 		for (const node of event.composedPath()) {
 			if (node === component) return component.matches(selector);
@@ -538,13 +552,15 @@ export class TemplesComponent extends HTMLElement {
 		this.renderer = new Renderer(container);
 
 		for (const name of ctor.observedAttributes) {
+			const state = this.state as Record<string, unknown>;
+
 			if (this.hasAttribute(name)) {
-				this.state[name] = this.coerceAttribute(name, this.getAttribute(name));
+				state[name] = this.coerceAttribute(name, this.getAttribute(name));
 			} else if (
 				TemplesComponent.globalStore !== undefined &&
 				name in TemplesComponent.globalStore
 			) {
-				this.state[name] = TemplesComponent.globalStore[name];
+				state[name] = TemplesComponent.globalStore[name];
 			}
 		}
 
@@ -589,7 +605,8 @@ export class TemplesComponent extends HTMLElement {
 	 * @param newValue - The new value, or null when removed.
 	 */
 	attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
-		this.state[name] = this.coerceAttribute(name, newValue);
+		(this.state as Record<string, unknown>)[name] = this.coerceAttribute(name, newValue);
+
 		this.rerender();
 	}
 

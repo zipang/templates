@@ -442,6 +442,78 @@ describe("TemplesComponent.define", () => {
 	});
 });
 
+describe("TemplesComponent typed state", () => {
+	interface CounterState {
+		count: number;
+		done: boolean;
+	}
+
+	class TypedCounter extends TemplesComponent<CounterState> {
+		constructor() {
+			super({ count: 0, done: false });
+		}
+
+		increment(): void {
+			this.state.count += 1;
+		}
+	}
+
+	test("a subclass declares its state type and reads typed fields", () => {
+		TemplesComponent.define("typed-counter", TypedCounter, {
+			template: "<p data-bind='text=count'>?</p>"
+		});
+
+		const elt = document.createElement("typed-counter") as TypedCounter;
+		document.body.appendChild(elt);
+
+		expect(elt.state.count).toBe(0);
+		expect(elt.state.done).toBe(false);
+		expect(elt.querySelector("p")?.textContent).toBe("0");
+
+		elt.increment();
+
+		expect(elt.state.count).toBe(1);
+		expect(elt.querySelector("p")?.textContent).toBe("1");
+
+		elt.remove();
+	});
+
+	test("define() accepts a concrete typed subclass", () => {
+		class Badge extends TemplesComponent<{ level: number }> {
+			constructor() {
+				super({ level: 0 });
+			}
+		}
+
+		expect(() =>
+			TemplesComponent.define("typed-badge", Badge, {
+				template: "<p>?</p>",
+				attributes: { level: "number" }
+			})
+		).not.toThrow();
+	});
+
+	test("a wrong-shape initial state is a compile error", () => {
+		class WrongShape extends TemplesComponent<CounterState> {
+			constructor() {
+				// @ts-expect-error — the initial state must match the declared shape
+				super({ wrong: true });
+			}
+		}
+
+		void WrongShape;
+	});
+
+	test("a wrong-type state assignment is a compile error", () => {
+		const counter = new TypedCounter();
+
+		// @ts-expect-error — `count` is typed as a number
+		counter.state.count = "not a number";
+
+		void counter;
+	});
+});
+
 describe("TemplesComponent events", () => {
 	test("registers a single document listener per event type", () => {
 		const original = document.addEventListener;
