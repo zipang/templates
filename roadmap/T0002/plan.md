@@ -15,7 +15,7 @@ packages/
   components  @temples/components  ← TemplesComponent + reactive(), deps: engine
   ssr         @temples/ssr         ← linkedom wiring + dom-globals, deps: engine, linkedom
   jquery      @temples/jquery      ← $.fn.temples, deps: engine, peer: jquery
-  docs        (private)            ← Bun.markdown + Renderer → docs/dist/ static site
+  docs        (private)            ← Bun.markdown + Renderer → docs/www/ static site
 ```
 
 Dependency graph (publish order follows it):
@@ -31,7 +31,7 @@ engine + ssr ──→ docs (private, not published)
 
 ### 1. Workspace packages
 Each package carries: `package.json` (name `@temples/<pkg>`, `type: "module"`, `exports` map to
-`dist/`, `files: ["dist", "README.md"]`, `publishConfig.access: "public"`, `sideEffects` where
+`www/`, `files: ["www", "README.md"]`, `publishConfig.access: "public"`, `sideEffects` where
 needed), its own `tsconfig.json` (extends the root), a `tsconfig.build.json` (declaration emit),
 and a build script.
 
@@ -71,7 +71,7 @@ Build order: engine first, then components/ssr/jquery (their `.d.ts` resolution 
   `data-bind="html=page.content"`, title/head via `data-bind`.
 - `build.ts` — the pipeline: read manifest → `Bun.markdown.html(md, { headings: { ids: true } })`
   → feed `{ title, content, nav }` into a `Renderer` (layout) → `renderToString()` → write
-  `docs/dist/<slug>/index.html` + `docs/dist/assets/style.css` + `docs/dist/llms.txt`.
+  `docs/www/<slug>/index.html` + `docs/www/assets/style.css` + `docs/www/llms.txt`.
 - `Bun.markdown` is unstable: all markdown parsing lives in one module (`markdown.ts`) so a parser
   swap touches one file.
 - Relative asset paths so the site works under GitHub Pages subpaths.
@@ -85,8 +85,8 @@ short package-specific intro with a pointer to the site.
 
 ### 6. Deploy
 - `.github/workflows/docs.yml`: on push to `main` → `bun install`, `bun run docs:build`, upload
-  `packages/docs/dist` via official GitHub Pages actions.
-- Vercel alternative documented in `packages/docs/README.md` (output dir `packages/docs/dist`).
+  `packages/docs/www` via official GitHub Pages actions.
+- Vercel alternative documented in `packages/docs/README.md` (output dir `packages/docs/www`).
 
 ## Implementation Order
 
@@ -114,7 +114,7 @@ Phase 6: Release gate (1.0.0, changelog, final checks)    T8
 ## Verification Checkpoints
 
 - After Phase 1: `bun install && bun test && bun run check && bun run typecheck` all green; example still runs.
-- After Phase 2: `bun run build` produces complete `dist/` in all four packages.
+- After Phase 2: `bun run build` produces complete `www/` in all four packages.
 - After Phase 3: `bun publish --dry-run` succeeds for all four packages with the expected file list.
 - After Phase 4: `bun run docs:build` produces valid HTML for every page + `llms.txt`; verified in a browser.
 - After Phase 5: workflow file valid; its build step runs locally without error.

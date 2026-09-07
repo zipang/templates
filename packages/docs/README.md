@@ -7,10 +7,10 @@ The documentation site of the temples packages — built **with temples itself**
 ```
 content/*.md  ──Bun.markdown──▶  HTML fragments
                                      │
-layout.html  ──@temples/ssr prepare()─▶  dist/<slug>.html  +  dist/assets/style.css
-content/*.md  ──raw copy─────────────▶  dist/<slug>.md  (plain-text counterpart)
+layout.html  ──@temples/ssr prepare()─▶  www/<slug>.html  +  www/assets/style.css
+content/*.md  ──raw copy─────────────▶  www/<slug>.md  (plain-text counterpart)
                                      │
-                                     └──▶  dist/llms.txt  (agent index, links the .md files)
+                                     └──▶  www/llms.txt  (agent index, links the .md files)
 ```
 
 - `content/*.md` — one file per page. The front-matter block carries `title`, `description`,
@@ -27,28 +27,28 @@ content/*.md  ──raw copy─────────────▶  dist/<sl
   parser swap stays a one-file change.
 - `src/build.ts` — the pipeline. `buildSite()` is exported for tests; the script runs it when
   executed directly. It copies every visible page as raw markdown next to its HTML file.
-- `src/serve.ts` — serves `dist/` with a Bun file route for the root, and a `fetch` handler
-  for every other path. When the path does not name a file in `dist/`, the handler serves
+- `src/serve.ts` — serves `www/` with a Bun file route for the root, and a `fetch` handler
+  for every other path. When the path does not name a file in `www/`, the handler serves
   `404.html` with status 404.
 
 ## Commands
 
 ```sh
-bun run docs:build    # build the site into dist/
-bun run docs:serve    # serve dist/ at http://localhost:4173
+bun run build:docs    # build the site into www/
+bun run serve:docs    # serve www/ at http://localhost:4173
 bun test              # the build has a smoke test (build.test.ts)
 ```
 
 ## Deployment
 
-The site is a plain static output: any static host works, with `dist/` as the publish directory
-and `bun install && bun run docs:build` as the build command.
+The site is a plain static output: any static host works, with `www/` as the publish directory
+and `bun install && bun run build:docs` as the build command.
 
 - **GitHub Pages** — `.github/workflows/docs.yml` deploys on every push to `main`. Pages serves
   the site under a subpath (`/temples/`), which the build supports because all asset and page
-  links are relative. Pages also uses `dist/404.html` as its error page.
+  links are relative. Pages also uses `www/404.html` as its error page.
 - **Vercel / Netlify / Cloudflare Pages** — create a project pointed at this repository with:
-  - build command: `bun install && bun run docs:build`
-  - output directory: `packages/docs/dist`
-- **LLM agents** — the build emits `dist/llms.txt`, an index of every page with absolute links
+  - build command: `bun install && bun run build:docs`
+  - output directory: `packages/docs/www`
+- **LLM agents** — the build emits `www/llms.txt`, an index of every page with absolute links
   to its raw markdown (`<slug>.md`), so agents fetch plain text instead of HTML.

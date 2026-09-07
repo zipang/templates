@@ -39,7 +39,7 @@ Docs build:     bun run docs:build
 Docs serve:     bun run docs:serve
 Publish check:  cd packages/engine && bun publish --dry-run   (repeat per package)
 Publish:        bun run publish:all                            (engine → components → ssr → jquery)
-Deploy docs:    GitHub Actions workflow (push to main) or `vercel deploy docs/dist` (alternative)
+Deploy docs:    GitHub Actions workflow (push to main) or `vercel deploy docs/www` (alternative)
 ```
 
 ## Project Structure
@@ -50,7 +50,7 @@ packages/
   components/   @temples/components  src: component.ts, reactive.ts (+ tests)
   ssr/          @temples/ssr         src: ssr.ts, utilities/dom-globals.ts (+ tests)
   jquery/       @temples/jquery      src: jquery.ts (+ tests)
-  docs/         (private)            content/*.md, layout.html, style.css, build.ts, dist/ (built site)
+  docs/         (private)            content/*.md, layout.html, style.css, build.ts, www/ (built site)
 example/        stays at root; imports updated to scoped package names
 roadmap/        numbered tickets (spec, plan, todo)
 .github/        workflows: docs deploy to GitHub Pages
@@ -73,7 +73,7 @@ const findPage = (slug: string) => pages.find((page) => page.slug === slug);
 
 - `bun test` at the root discovers colocated `*.test.ts` in every workspace.
 - `test/setup.ts` (root preload) installs DOM globals from linkedom for browser-API tests.
-- The docs build gets a smoke test: building produces `docs/dist/index.html` and `docs/dist/llms.txt`.
+- The docs build gets a smoke test: building produces `docs/www/index.html` and `docs/www/llms.txt`.
 - Publish metadata is verified with `bun publish --dry-run` (packs the tarball, no upload).
 
 ## Boundaries
@@ -83,14 +83,14 @@ const findPage = (slug: string) => pages.find((page) => page.slug === slug);
   parsing isolated in one module.
 - Ask first: changing the public API surface of any package; adding a runtime dependency; changing
   the package names or scope; creating the npm org (human action).
-- Never: publish for real without human confirmation (OTP required); commit `dist/` output;
+- Never: publish for real without human confirmation (OTP required); commit `www/` output;
   reintroduce the v0 name-based registry; import linkedom or jQuery from `@temples/engine`.
 
 ## Success Criteria
 
-- All four packages build to `dist/` with valid `exports` maps and `.d.ts` files.
+- All four packages build to `www/` with valid `exports` maps and `.d.ts` files.
 - `bun publish --dry-run` succeeds for all four packages with the correct file list.
-- `bun run docs:build` produces a static site in `docs/dist/` with per-page HTML, assets, and `llms.txt`.
+- `bun run docs:build` produces a static site in `docs/www/` with per-page HTML, assets, and `llms.txt`.
 - The docs document the current reactive API and the `@temples/*` import paths.
 - GitHub Actions workflow builds and deploys the docs to GitHub Pages.
 - All packages versioned 1.0.0; CHANGELOG.md records the release.

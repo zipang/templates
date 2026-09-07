@@ -4,7 +4,7 @@ node_modules
 # build output
 out
 packages/*/dist
-packages/docs/dist
+packages/docs/www
 
 # TypeScript
 *.tsbuildinfo

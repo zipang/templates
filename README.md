@@ -34,7 +34,7 @@ bun run check          # Biome format + lint
 bun run typecheck      # tsc --noEmit
 bun run build          # build all packages (engine first)
 bun run dev            # serve the example app
-bun run docs:build     # build the documentation site
+bun run build:docs     # build the documentation site
 ```
 
 ## Repository layout

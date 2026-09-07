@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { buildSite } from "./build";
 
 /** Root of the built documentation site, as written by `buildSite()`. */
-const distDir = resolve(import.meta.dir, "..", "dist");
+const wwwDir = resolve(import.meta.dir, "..", "www");
 
 describe("docs build", () => {
 	test("builds every page, the stylesheet, and llms.txt", async () => {
@@ -11,18 +11,18 @@ describe("docs build", () => {
 
 		expect(pages.length).toBeGreaterThanOrEqual(3);
 
-		const index = await Bun.file(resolve(distDir, "index.html")).text();
+		const index = await Bun.file(resolve(wwwDir, "index.html")).text();
 
 		expect(index).toContain("<!DOCTYPE html>");
 		expect(index).toContain("assets/style.css");
 
-		const llms = await Bun.file(resolve(distDir, "llms.txt")).text();
+		const llms = await Bun.file(resolve(wwwDir, "llms.txt")).text();
 
 		expect(llms).toContain("# temples documentation");
 		expect(llms).toContain("## Pages");
 
 		for (const page of pages) {
-			const html = await Bun.file(resolve(distDir, page.url)).text();
+			const html = await Bun.file(resolve(wwwDir, page.url)).text();
 
 			expect(html).toContain("<!DOCTYPE html>");
 			expect(html).toContain(`href="${page.url}"`);
@@ -32,9 +32,9 @@ describe("docs build", () => {
 	test("builds a 404 page that is excluded from the navigation and llms.txt", async () => {
 		await buildSite();
 
-		const index = await Bun.file(resolve(distDir, "index.html")).text();
-		const llms = await Bun.file(resolve(distDir, "llms.txt")).text();
-		const notFound = await Bun.file(resolve(distDir, "404.html")).text();
+		const index = await Bun.file(resolve(wwwDir, "index.html")).text();
+		const llms = await Bun.file(resolve(wwwDir, "llms.txt")).text();
+		const notFound = await Bun.file(resolve(wwwDir, "404.html")).text();
 
 		expect(notFound).toContain("Page not found");
 		expect(notFound).toContain('href="getting-started.html"');
@@ -46,17 +46,17 @@ describe("docs build", () => {
 	test("exports each visible page as raw markdown, referenced by llms.txt", async () => {
 		await buildSite();
 
-		const markdown = await Bun.file(resolve(distDir, "getting-started.md")).text();
+		const markdown = await Bun.file(resolve(wwwDir, "getting-started.md")).text();
 
 		expect(markdown).toContain("title: Getting started");
 		expect(markdown).toContain("# Getting started");
 
-		const llms = await Bun.file(resolve(distDir, "llms.txt")).text();
+		const llms = await Bun.file(resolve(wwwDir, "llms.txt")).text();
 
 		expect(llms).toContain("(https://zipang.github.io/temples/getting-started.md)");
 		expect(llms).not.toContain(".html");
 
-		const notFoundMarkdown = Bun.file(resolve(distDir, "404.md"));
+		const notFoundMarkdown = Bun.file(resolve(wwwDir, "404.md"));
 
 		expect(await notFoundMarkdown.exists()).toBe(false);
 	});
@@ -64,7 +64,7 @@ describe("docs build", () => {
 	test("declares the llms.txt index as a describedby link", async () => {
 		await buildSite();
 
-		const page = await Bun.file(resolve(distDir, "getting-started.html")).text();
+		const page = await Bun.file(resolve(wwwDir, "getting-started.html")).text();
 
 		expect(page).toContain('<link rel="describedby" href="llms.txt">');
 	});
@@ -72,11 +72,11 @@ describe("docs build", () => {
 	test("declares the markdown export as an alternate link in each visible page", async () => {
 		await buildSite();
 
-		const page = await Bun.file(resolve(distDir, "getting-started.html")).text();
+		const page = await Bun.file(resolve(wwwDir, "getting-started.html")).text();
 
 		expect(page).toContain('<link rel="alternate" type="text/markdown" href="getting-started.md">');
 
-		const notFound = await Bun.file(resolve(distDir, "404.html")).text();
+		const notFound = await Bun.file(resolve(wwwDir, "404.html")).text();
 
 		expect(notFound).not.toContain('type="text/markdown"');
 	});

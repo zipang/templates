@@ -29,6 +29,6 @@ jobs:
       - run: bun run docs:build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: packages/docs/dist
+          path: packages/docs/www
       - id: deployment
         uses: actions/deploy-pages@v4

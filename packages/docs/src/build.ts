@@ -13,7 +13,7 @@ const BASE_URL = "https://zipang.github.io/temples";
 const CONTENT_DIR = resolve(DOCS_DIR, "content");
 
 /** The directory receiving the built site. */
-const DIST_DIR = resolve(DOCS_DIR, "dist");
+const WWW_DIR = resolve(DOCS_DIR, "www");
 
 /** Front-matter and body of one markdown source file. */
 interface PageSource {
@@ -133,7 +133,7 @@ const buildLlmsTxt = (pages: PageMeta[]): string => {
 };
 
 /**
- * Build the static documentation site into `dist/`.
+ * Build the static documentation site into `www/`.
  *
  * Every markdown page is converted to HTML, rendered through the temples
  * layout with `@temples/ssr`, and written as `<slug>.html`. Its raw markdown
@@ -159,10 +159,10 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 	const layout = await Bun.file(resolve(DOCS_DIR, "layout.html")).text();
 	const renderLayout = prepare(layout, { removeDataBindings: false });
 
-	await mkdir(DIST_DIR, { recursive: true });
+	await mkdir(WWW_DIR, { recursive: true });
 
 	await Bun.write(
-		resolve(DIST_DIR, "assets", "style.css"),
+		resolve(WWW_DIR, "assets", "style.css"),
 		Bun.file(resolve(DOCS_DIR, "assets", "style.css"))
 	);
 
@@ -177,24 +177,24 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 			}
 		});
 
-		await Bun.write(resolve(DIST_DIR, `${source.slug}.html`), html);
+		await Bun.write(resolve(WWW_DIR, `${source.slug}.html`), html);
 
 		if (!source.hidden) {
 			await Bun.write(
-				resolve(DIST_DIR, `${source.slug}.md`),
+				resolve(WWW_DIR, `${source.slug}.md`),
 				Bun.file(resolve(CONTENT_DIR, `${source.slug}.md`))
 			);
 		}
 	}
 
-	await Bun.write(resolve(DIST_DIR, "llms.txt"), buildLlmsTxt(metas));
+	await Bun.write(resolve(WWW_DIR, "llms.txt"), buildLlmsTxt(metas));
 
 	return metas;
 };
 
 if (import.meta.main) {
 	const pages = await buildSite();
-	console.log(`Built ${pages.length} pages into packages/docs/dist:`);
+	console.log(`Built ${pages.length} pages into packages/docs/www:`);
 
 	for (const page of pages) {
 		console.log(`  ${page.url}`);

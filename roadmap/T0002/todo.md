@@ -19,17 +19,17 @@ Tasks are ordered by dependency. Follow `test-driven-development` for any new lo
 ## Phase 2: Build
 
 - [x] **T2: Per-package build scripts + root orchestration**
-  - Acceptance: each package builds to `dist/` (browser ESM + minified; Node ESM for ssr) plus
+  - Acceptance: each package builds to `www/` (browser ESM + minified; Node ESM for ssr) plus
     `.d.ts` via `tsconfig.build.json`, with `@temples/engine`, `linkedom`, `jquery` kept external.
     Root `build` runs packages in dependency order (engine first).
-  - Verify: `bun run build` succeeds; each `dist/` holds the expected js/min/d.ts files; a dist file's imports of `@temples/engine` remain bare (not bundled).
+  - Verify: `bun run build` succeeds; each `www/` holds the expected js/min/d.ts files; a dist file's imports of `@temples/engine` remain bare (not bundled).
   - Files: `packages/*/package.json`, `packages/*/tsconfig*.json`, root `package.json`
 
 ## Phase 3: Publish metadata
 
 - [x] **T3: package.json metadata + READMEs**
   - Acceptance: every package has `publishConfig.access: "public"`, version 1.0.0, description,
-    license, repository, keywords, `files: ["dist", "README.md"]`. `linkedom` is a runtime
+    license, repository, keywords, `files: ["www", "README.md"]`. `linkedom` is a runtime
     dependency of ssr; `jquery` a peerDependency of jquery; the stray `typescript` peerDependency
     is dropped. Each package has a README documenting the current reactive API with `@temples/*`
     imports; the root README becomes a monorepo overview. No mention of the removed
@@ -43,7 +43,7 @@ Tasks are ordered by dependency. Follow `test-driven-development` for any new lo
   - Acceptance: `packages/docs/build.ts` reads the content manifest, converts markdown with
     `Bun.markdown` (isolated in `src/markdown.ts`), renders pages through a temples layout
     (`Renderer` + `@temples/ssr`) with nav iteration and `data-bind="html=page.content"`, and
-    writes `docs/dist/<slug>/index.html` + relative assets. Works under a subpath base.
+    writes `docs/www/<slug>/index.html` + relative assets. Works under a subpath base.
   - Verify: `bun run docs:build` produces valid HTML for every page; spot-check in a browser.
   - Files: `packages/docs/{package.json,tsconfig.json}`, `packages/docs/src/**`, `packages/docs/layout.html`, `packages/docs/assets/style.css`
 
@@ -55,7 +55,7 @@ Tasks are ordered by dependency. Follow `test-driven-development` for any new lo
   - Files: `packages/docs/content/*.md`
 
 - [x] **T6: llms.txt generation**
-  - Acceptance: the build emits `docs/dist/llms.txt` from the manifest (site title, one-line
+  - Acceptance: the build emits `docs/www/llms.txt` from the manifest (site title, one-line
     description per page, absolute markdown/HTML URLs).
   - Verify: built file exists, links match the emitted pages.
   - Files: `packages/docs/src/build.ts`
@@ -64,8 +64,8 @@ Tasks are ordered by dependency. Follow `test-driven-development` for any new lo
 
 - [x] **T7: GitHub Pages workflow + Vercel alternative**
   - Acceptance: `.github/workflows/docs.yml` installs, builds the docs, and deploys
-    `packages/docs/dist` to GitHub Pages on push to `main`. `packages/docs/README.md` documents the
-    Vercel alternative (output dir `packages/docs/dist`).
+    `packages/docs/www` to GitHub Pages on push to `main`. `packages/docs/README.md` documents the
+    Vercel alternative (output dir `packages/docs/www`).
   - Verify: the workflow's build steps run locally without error; YAML is valid.
   - Files: `.github/workflows/docs.yml`, `packages/docs/README.md`
 
