@@ -12,21 +12,12 @@ import "./shopping-app.css";
  * `shopping-item:removed`, and `shopping-vault:recalled`.
  */
 export class ShoppingApp extends TemplesComponent {
-	static override observedAttributes = ["title"];
-
 	override state = {
 		title: "",
 		items: [] as ShoppingItemData[],
 		isEmpty() {
 			return this.items.length === 0;
 		}
-	};
-
-	static override events = {
-		"submit .add-form": "addItem",
-		"shopping-item:updated": "updateItem",
-		"shopping-item:removed": "removeItem",
-		"shopping-vault:recalled": "recallItem"
 	};
 
 	/**
@@ -83,5 +74,12 @@ export class ShoppingApp extends TemplesComponent {
 
 TemplesComponent.define("shopping-app", ShoppingApp, {
 	template,
+	attributes: { title: "string" },
+	events: {
+		"submit .add-form": "addItem",
+		"shopping-item:updated": "updateItem",
+		"shopping-item:removed": "removeItem",
+		"shopping-vault:recalled": "recallItem"
+	},
 	globalStore: { title: "My Shopping List" }
 });

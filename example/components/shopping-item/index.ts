@@ -1,4 +1,4 @@
-import { type AttributeType, TemplesComponent } from "@temples/components";
+import { TemplesComponent } from "@temples/components";
 import type { ShoppingItemData } from "../../types.ts";
 import template from "./shopping-item.html" with { type: "text" };
 import "./shopping-item.css";
@@ -6,15 +6,13 @@ import "./shopping-item.css";
 /**
  * A single shopping list entry, configured through plain attributes.
  *
- * `id`, `label`, and `checked` are observed attributes fed by the parent
- * `shopping-app`. `editing` is internal state that toggles the inline editor.
- * The component never mutates the shared list directly: it emits `updated` and
- * `removed` messages carrying the full item, and the app owns the data.
+ * `id`, `label`, and `checked` are observed attributes declared in the
+ * `attributes` map of `define()`, fed by the parent `shopping-app`. `editing`
+ * is internal state that toggles the inline editor. The component never
+ * mutates the shared list directly: it emits `updated` and `removed` messages
+ * carrying the full item, and the app owns the data.
  */
 export class ShoppingItem extends TemplesComponent {
-	static override observedAttributes = ["id", "label", "checked"];
-	static override attributeTypes: Record<string, AttributeType> = { checked: "boolean" };
-
 	override state = {
 		id: "",
 		label: "",
@@ -26,13 +24,6 @@ export class ShoppingItem extends TemplesComponent {
 		notEditing() {
 			return !this.editing;
 		}
-	};
-
-	static override events = {
-		"change .toggle": "onToggle",
-		"click .edit": "onEdit",
-		"click .save": "onSave",
-		"click .remove": "onRemove"
 	};
 
 	/**
@@ -83,5 +74,12 @@ export class ShoppingItem extends TemplesComponent {
 }
 
 TemplesComponent.define("shopping-item", ShoppingItem, {
-	template
+	template,
+	attributes: { id: "string", label: "string", checked: "boolean" },
+	events: {
+		"change .toggle": "onToggle",
+		"click .edit": "onEdit",
+		"click .save": "onSave",
+		"click .remove": "onRemove"
+	}
 });
