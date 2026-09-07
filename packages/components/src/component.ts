@@ -73,6 +73,58 @@ export interface DefineOptions {
 }
 
 /**
+ * The structural type of any `TemplesComponent` subclass constructor.
+ *
+ * `define()` and the server-side rendering pipeline accept any subclass,
+ * whatever state type its instances carry. The construct signature uses
+ * `never[]` arguments so every subclass constructor is assignable, and it
+ * returns the `HTMLElement` surface because no boundary consumer reads
+ * instance state.
+ */
+export interface TemplesComponentClass {
+	/**
+	 * The custom element tag name, e.g. `"todo-app"`.
+	 */
+	tag: string;
+
+	/**
+	 * The HTML template string, parsed once by `define()`.
+	 */
+	template: string;
+
+	/**
+	 * The component stylesheet, concatenated into the SSR output by `prepare()`.
+	 */
+	css: string;
+
+	/**
+	 * The declarative event map, mapping a binding to a handler method name.
+	 */
+	events: EventMap;
+
+	/**
+	 * Attribute names observed for changes, written into `state`.
+	 */
+	observedAttributes: string[];
+
+	/**
+	 * The coercion map from attribute name to `AttributeType`.
+	 */
+	attributeTypes: Record<string, AttributeType>;
+
+	/**
+	 * The global data store shared by every component.
+	 */
+	globalStore?: TemplesData;
+
+	/**
+	 * Create a component instance. `never[]` accepts any subclass constructor
+	 * parameter list.
+	 */
+	new (...args: never[]): HTMLElement;
+}
+
+/**
  * A message subscription, tying a handler method to the component that owns it.
  *
  * The bus stores the component and the resolved handler so delivery can invoke
@@ -263,20 +315,20 @@ export class TemplesComponent extends HTMLElement {
 	 */
 	static define(
 		tagName: string,
-		componentClass: typeof TemplesComponent,
+		componentClass: TemplesComponentClass,
 		options: DefineOptions
 	): void;
 
 	static define(
 		tagNameOrOptions?: string | { globalStore?: TemplesData },
-		componentClass?: typeof TemplesComponent,
+		componentClass?: TemplesComponentClass,
 		options?: DefineOptions
 	): void {
 		// biome-ignore lint/complexity/noThisInStatic: `this` is the subclass constructor in the backward-compatible form.
-		const self = this as typeof TemplesComponent;
+		const self = this as unknown as TemplesComponentClass;
 
-		const ctor =
-			typeof tagNameOrOptions === "string" ? (componentClass as typeof TemplesComponent) : self;
+		const ctor: TemplesComponentClass =
+			typeof tagNameOrOptions === "string" ? (componentClass as TemplesComponentClass) : self;
 
 		if (typeof tagNameOrOptions === "string") {
 			ctor.tag = tagNameOrOptions;
@@ -303,7 +355,10 @@ export class TemplesComponent extends HTMLElement {
 
 		TemplesComponent.resolveTemplate(ctor);
 		TemplesComponent.registerEventTypes(ctor);
-		customElements.define(ctor.tag, ctor);
+
+		// The platform calls a custom element constructor with no arguments;
+		// the `never[]` boundary signature accepts every subclass constructor.
+		customElements.define(ctor.tag, ctor as unknown as CustomElementConstructor);
 	}
 
 	/**
@@ -317,7 +372,7 @@ export class TemplesComponent extends HTMLElement {
 	 * @param tagName - The custom element tag name, quoted in the error message.
 	 * @param ctor - The component class to check.
 	 */
-	private static assertNoStaticAttributes(tagName: string, ctor: typeof TemplesComponent): void {
+	private static assertNoStaticAttributes(tagName: string, ctor: TemplesComponentClass): void {
 		const hasOwnObserved = Object.hasOwn(ctor, "observedAttributes");
 		const hasOwnTypes = Object.hasOwn(ctor, "attributeTypes");
 
@@ -338,7 +393,7 @@ export class TemplesComponent extends HTMLElement {
 	 *
 	 * @param ctor - The component class whose `events` map to register.
 	 */
-	private static registerEventTypes(ctor: typeof TemplesComponent): void {
+	private static registerEventTypes(ctor: TemplesComponentClass): void {
 		for (const binding of Object.keys(ctor.events)) {
 			const space = binding.indexOf(" ");
 
@@ -450,7 +505,7 @@ export class TemplesComponent extends HTMLElement {
 	 * @param ctor - The component class whose template to resolve.
 	 * @returns The template element in the document head.
 	 */
-	private static resolveTemplate(ctor: typeof TemplesComponent): HTMLTemplateElement {
+	private static resolveTemplate(ctor: TemplesComponentClass): HTMLTemplateElement {
 		let template = document.head.querySelector<HTMLTemplateElement>(`template#${ctor.tag}`);
 
 		if (template === null) {
