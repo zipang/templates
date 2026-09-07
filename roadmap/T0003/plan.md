@@ -28,7 +28,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Phase 1: API
 
-- [ ] **Task 1: `attributes` option + guard in `define()`**
+- [x] **Task 1: `attributes` option + guard in `define()`**
   - Acceptance: `DefineOptions` carries `attributes`. `define()` derives
     `observedAttributes`/`attributeTypes` and throws on a double definition. Tests cover the
     derivation, the coercion of every `AttributeType` through the tag, and the guard error.
@@ -37,7 +37,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
   - Files: `packages/components/src/component.ts`, `packages/components/src/component.test.ts`
   - Depends: None
 
-- [ ] **Task 2: Migrate the component tests to the canonical form**
+- [x] **Task 2: Migrate the component tests to the canonical form**
   - Acceptance: every test registers through the three-argument form. Classes keep `state` and
     handlers only. The `events`-override compatibility test stays as the single static-events
     case. No test class declares `observedAttributes` or `attributeTypes`.
@@ -52,14 +52,14 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Phase 2: Consumers
 
-- [ ] **Task 3: Migrate the example app**
+- [x] **Task 3: Migrate the example app**
   - Acceptance: `shopping-item` and `shopping-app` declare no attribute statics. `define()`
     receives `attributes: { ... }`. The list keeps its behavior.
   - Verify: `bun test` plus a manual check of `bun run dev`
   - Files: `example/components/shopping-item/index.ts`, `example/components/shopping-app/index.ts`
   - Depends: Task 1
 
-- [ ] **Task 4: Rewrite the component docs**
+- [x] **Task 4: Rewrite the component docs**
   - Acceptance: `README.md`, `components.md`, and `api-reference.md` show the three-argument
     form only. The "Static fields" tables become a `DefineOptions` table with `attributes`. The
     State, Lifecycle, and API-reference sections name the `attributes` map. No doc mentions the
@@ -71,12 +71,12 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Checkpoint: Consumers
 
-- [ ] Example works in the browser
-- [ ] Docs build and show one declaration form
+- [x] Example works in the browser
+- [x] Docs build and show one declaration form
 
 ### Phase 3: Gate
 
-- [ ] **Task 5: Full verification + commit preparation**
+- [x] **Task 5: Full verification + commit preparation**
   - Acceptance: the full gate passes. Every docs snippet matches the implementation. The spec
     and the plan stay accurate.
   - Verify: `bun run check && bun run typecheck && bun test && bun run build:docs`
@@ -85,7 +85,7 @@ The Task List section is the markdown TODO list — one checkbox per task:
 
 ### Checkpoint: Complete
 
-- [ ] All acceptance criteria met
+- [x] All acceptance criteria met
 - [ ] Ticket committed, ready for implementation
 
 ## Risks and Mitigations
