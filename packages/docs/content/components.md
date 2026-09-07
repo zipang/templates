@@ -32,7 +32,9 @@ import template from "./flipping-card.html" with { type: "text" };
 import "./flipping-card.css";
 
 export class FlippingCard extends TemplesComponent {
-    state = { flipped: false };
+    constructor() {
+        super({ flipped: false });
+    }
 
     flip() {
         this.state.flipped = true;
@@ -77,7 +79,8 @@ throw.
 
 ## State: attributes are the source of truth
 
-A component's data lives in `this.state`, a deep reactive proxy built on connection:
+A component's data lives in `this.state`. The subclass passes its initial values to `super()`,
+and the state becomes a deep reactive proxy at construction:
 
 - Each name in the `attributes` map is read from the tag, coerced by its declared type, and
   written into `state`.

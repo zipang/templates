@@ -83,7 +83,7 @@ A class that declares its own `observedAttributes` or `attributeTypes` statics, 
 
 | Member | Description |
 |--------|-------------|
-| `state` | The reactive state object: attributes coerced by the `attributes` types, plus any internal values. Any mutation re-renders. |
+| `state` | The reactive state object, initialized through `super({ ... })` in the subclass constructor: attributes coerced by the `attributes` types, plus any internal values. Any mutation re-renders. |
 | `emit(name, detail?)` | Emits an inter-component message, delivered as `"<tag>:<name>"` on the shared bus. |
 | `on(events)` | Merges additional bindings at runtime, same map format as the `events` option. |
 

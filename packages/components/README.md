@@ -23,7 +23,9 @@ import template from "./flipping-card.html" with { type: "text" };
 import "./flipping-card.css";
 
 export class FlippingCard extends TemplesComponent {
-    state = { flipped: false };
+    constructor() {
+        super({ flipped: false });
+    }
 
     flip() {
         this.state.flipped = true; // reactive: mutation re-renders
