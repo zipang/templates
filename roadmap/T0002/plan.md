@@ -1,6 +1,6 @@
 # Implementation Plan: `@temples/*` npm publication + docs site
 
-Spec: `tasks/spec-npm-docs.md`.
+Spec: `spec-npm-docs.md`.
 
 ## Architecture Overview
 

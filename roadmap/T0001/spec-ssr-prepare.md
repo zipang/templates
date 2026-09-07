@@ -37,8 +37,8 @@ Check:    bun run check
 - `src/component.ts` — expose what `webComponents` SSR needs to render a
   `TemplesComponent` by tag (template, css, events).
 - `src/ssr.test.ts` — tests for `prepare` and each option.
-- `tasks/plan.md` — document the new API and the reversed component-SSR decision.
-- `tasks/todo.md` — add the tasks.
+- `roadmap/T0002/plan.md` — document the new API and the reversed component-SSR decision.
+- `roadmap/T0002/todo.md` — add the tasks.
 - `package.json` — mark `./dist/ssr.js` as side-effectful (see Boundaries).
 
 ## Public API
@@ -171,7 +171,7 @@ with no Temples footprint.
 - Each option produces the output described above.
 - `bun run typecheck`, `bun run check`, and `bun test` all pass.
 - `bun run build` emits `dist/ssr.js` containing `prepare`.
-- The spec and new API are documented in `tasks/plan.md` / `tasks/todo.md`.
+- The spec and new API are documented in `roadmap/T0002/plan.md` / `roadmap/T0002/todo.md`.
 
 ## Boundaries
 

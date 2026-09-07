@@ -52,7 +52,7 @@ packages/
   jquery/       @temples/jquery      src: jquery.ts (+ tests)
   docs/         (private)            content/*.md, layout.html, style.css, build.ts, dist/ (built site)
 example/        stays at root; imports updated to scoped package names
-tasks/          spec, plan, todo
+roadmap/        numbered tickets (spec, plan, todo)
 .github/        workflows: docs deploy to GitHub Pages
 ```
 

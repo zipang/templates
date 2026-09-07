@@ -1,6 +1,6 @@
 # Task List: `@temples/*` npm publication + docs site
 
-Spec: `tasks/spec-npm-docs.md`. Plan: `tasks/plan.md`.
+Spec: `spec-npm-docs.md`. Plan: `plan.md`.
 Tasks are ordered by dependency. Follow `test-driven-development` for any new logic.
 
 ---
