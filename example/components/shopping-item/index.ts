@@ -1,6 +1,7 @@
 import { TemplesComponent } from "@temples/components";
 import type { ShoppingItemData } from "../../types.ts";
 import template from "./shopping-item.html" with { type: "text" };
+
 import "./shopping-item.css";
 
 /**
@@ -9,9 +10,10 @@ import "./shopping-item.css";
  * helpers the template calls.
  */
 type ShoppingItemState = ShoppingItemData & {
+	checked: boolean;
 	editing: boolean;
-	checkedClass(): string;
-	notEditing(): boolean;
+	checkedStatus(): string;
+	editingStatus(): string;
 };
 
 /**
@@ -30,11 +32,11 @@ export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 			label: "",
 			checked: false,
 			editing: false,
-			checkedClass() {
-				return this.checked ? "checked" : "unchecked";
+			checkedStatus() {
+				return this.checked ? "checked" : "";
 			},
-			notEditing() {
-				return !this.editing;
+			editingStatus() {
+				return this.editing ? "editing" : "";
 			}
 		});
 	}
@@ -42,7 +44,7 @@ export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 	/**
 	 * Flip the checked flag and publish the updated item.
 	 */
-	onToggle(): void {
+	toggle(): void {
 		this.state.checked = !this.state.checked;
 		this.emit("updated", this.snapshot());
 	}
@@ -50,14 +52,14 @@ export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 	/**
 	 * Enter inline edit mode.
 	 */
-	onEdit(): void {
+	edit(): void {
 		this.state.editing = true;
 	}
 
 	/**
 	 * Commit the edited label and leave edit mode.
 	 */
-	onSave(): void {
+	save(): void {
 		const input = this.querySelector<HTMLInputElement>("input.edit-input");
 		const label = input?.value.trim() ?? "";
 
@@ -70,7 +72,7 @@ export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 	/**
 	 * Publish a removal request for this item.
 	 */
-	onRemove(): void {
+	remove(): void {
 		this.emit("removed", this.snapshot());
 	}
 
@@ -88,9 +90,9 @@ TemplesComponent.define("shopping-item", ShoppingItem, {
 	template,
 	attributes: { id: "string", label: "string", checked: "boolean" },
 	events: {
-		"change .toggle": "onToggle",
-		"click .edit": "onEdit",
-		"click .save": "onSave",
-		"click .remove": "onRemove"
+		"change .toggle": "toggle",
+		"dblclick .label": "edit",
+		"click .save": "save",
+		"click .remove": "remove"
 	}
 });

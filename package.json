@@ -20,7 +20,8 @@
 		"build:jquery": "cd packages/jquery && bun run build",
 		"build:docs": "cd packages/docs && bun run build",
 		"serve:docs": "cd packages/docs && bun run serve",
-		"publish:all": "cd packages/engine && bun publish && cd ../components && bun publish && cd ../ssr && bun publish && cd ../jquery && bun publish"
+		"publish:all": "cd packages/engine && bun publish && cd ../components && bun publish && cd ../ssr && bun publish && cd ../jquery && bun publish",
+		"demo": "bun --dev --hot example/index.html"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.9",
