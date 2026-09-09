@@ -24,7 +24,7 @@
 		"demo": "bun --dev --hot example/index.html"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.9",
+		"@biomejs/biome": "^2.5.12",
 		"@types/bun": "latest",
 		"@types/jquery": "^4.0.1",
 		"jquery": "^4.0.0",
