@@ -44,7 +44,7 @@ bun test              # the build has a smoke test (build.test.ts)
 The site is a plain static output: any static host works, with `www/` as the publish directory
 and `bun install && bun run build:docs` as the build command.
 
-- **GitHub Pages** — `.github/workflows/docs.yml` deploys on every push to `main`. Pages serves
+- **GitHub Pages** — `.github/workflows/deploy-docs.yml` deploys on every push to `master`. Pages serves
   the site under a subpath (`/temples/`), which the build supports because all asset and page
   links are relative. Pages also uses `www/404.html` as its error page.
 - **Vercel / Netlify / Cloudflare Pages** — create a project pointed at this repository with:
