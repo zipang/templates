@@ -139,13 +139,15 @@ The reactive primitive, exported separately for direct use:
 ### `prepare(source, options?)`
 
 Compiles an HTML source (fragment or full document, single root required) into an async render
-function:
+function. `prepare` itself is synchronous; the render call is the async boundary:
 
 ```typescript
-const render: (data: TemplesData) => Promise<string> = await prepare(source, {
-    removeDataBindings?: boolean;   // default true
-    templesComponents?: TemplesComponentClass[];
-    rehydrate?: boolean;            // reserved
+import type { RenderFunction } from "@temples/ssr";
+
+const render: RenderFunction = prepare(source, {
+    removeDataBindings: true, // default: unwrap rendered components to their children
+    templesComponents: [], // TemplesComponent classes used by the source
+    rehydrate: false // reserved
 });
 ```
 

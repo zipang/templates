@@ -10,8 +10,8 @@ data into them and re-renders single paths for real-time partial updates.
 bun add @temples/engine
 ```
 
-Works in the browser out of the box. On the server (Bun, Node.js, Deno), pair it with
-[`@temples/ssr`](../ssr) which wires the engine to a DOM.
+Works in the browser out of the box. On the server, pair it with
+[`@temples/ssr`](../ssr), which wires the engine to a DOM.
 
 ## Usage
 

@@ -1,15 +1,15 @@
 ---
-title: SSR and static site generation
+title: Static site generation (SSR)
 description: Render temples templates to HTML strings on the server with linkedom.
 order: 4
 ---
 
-# SSR and static site generation
+# How to use @temples as a static site generator
 
-The engine operates on a DOM. In the browser that is the native `document`; on the server there
-is no DOM, so `@temples/ssr` wires the engine to
-[linkedom](https://github.com/WebReflection/linkedom) — a fast DOM implementation — for parsing
-and serialization on Bun, Node.js, and Deno.
+The native HTML syntax of temples fits static site generation: plain HTML pages rendered with
+data from external sources (like a collection of markdown files). The site you are reading is
+generated this way. Its source lives in
+[`packages/docs`](https://github.com/zipang/temples/tree/master/packages/docs).
 
 ## Install
 
@@ -17,58 +17,71 @@ and serialization on Bun, Node.js, and Deno.
 bun add @temples/ssr
 ```
 
-## Render a template on the server
+**Note:** The engine operates on a DOM. In the browser that is the native `document`. On the
+server there is no DOM, so `@temples/ssr` (`ssr` stands for _Server Side Rendering_) wires the engine to
+[linkedom](https://github.com/WebReflection/linkedom), a fast DOM implementation, for parsing
+and serialization in server environments. linkedom is the only dependency of the package.
 
-Import the entry once, then use the `Renderer` exactly as in the browser:
+## Prepare a template
 
-```javascript
-import "@temples/ssr";
-import { Renderer } from "@temples/engine";
-
-const renderer = new Renderer("<h1 data-bind='article.title'>Title</h1>");
-renderer.render({ article: { title: "The Great Race" } });
-
-console.log(renderer.renderToString()); // <h1>The Great Race</h1>
-```
-
-The main `@temples/engine` entry never imports linkedom, so browser bundles stay small.
-
-## Static site generation
-
-For SSG, render one page per data set and write the returned strings to files:
-
-```javascript
-import "@temples/ssr";
-import { Renderer } from "@temples/engine";
-
-const layout = new Renderer(fullPageMarkup);
-
-for (const [slug, data] of Object.entries(pages)) {
-    layout.render(data);
-    await Bun.write(`dist/${slug}.html`, layout.renderToString());
-}
-```
-
-## `prepare()` — reusable render functions
-
-`prepare(source, options)` compiles a template into an async render function. Every call parses
-fresh and renders independently, so partial data from one call never leaks into the next. The
-default output strips the `data-*` control attributes when web components are rendered, and the
-result is plain markup:
+`prepare(source)` wires the engine to linkedom and returns an async render function:
 
 ```javascript
 import { prepare } from "@temples/ssr";
 
-const render = await prepare("<p data-bind='message'>Hello</p>");
+const render = prepare("<h1 data-bind='article.title'>Title</h1>");
+
+const html = await render({ article: { title: "The Great Race" } });
+console.log(html); // <h1>The Great Race</h1>
+```
+
+Each render call installs the linkedom globals for its duration, renders, and restores the
+previous globals after. The main `@temples/engine` entry never imports linkedom, so browser
+bundles stay small.
+
+## Static site generation
+
+For SSG, prepare the layout once, render one page per data set, and write the returned
+strings to files:
+
+```javascript
+import { prepare } from "@temples/ssr";
+
+const layout = await Bun.file("layout.html").text();
+const renderLayout = prepare(layout, { removeDataBindings: false });
+
+for (const [slug, data] of Object.entries(pages)) {
+    await Bun.write(`dist/${slug}.html`, await renderLayout(data));
+}
+```
+
+This is exactly how the documentation site is built — the complete pipeline lives in
+[`src/build.ts`](https://github.com/zipang/temples/tree/master/packages/docs/src/build.ts).
+
+## `prepare()` — reusable render functions
+
+`prepare(source, options)` compiles a template source into an async render function.
+`prepare` itself is synchronous; the render call is the async boundary. Every call re-parses
+the source and renders independently, so partial data from one call never leaks into the
+next:
+
+```javascript
+import { prepare } from "@temples/ssr";
+
+const render = prepare("<p data-bind='message'>Hello</p>");
 
 console.log(await render({ message: "Hello world" })); // <p>Hello world</p>
 ```
+
+The engine consumes the `data-*` control attributes during the render. Rendered components
+add one more step: with the default options, each component tag is unwrapped to its children,
+and the result is plain static markup.
 
 ### Options
 
 | Option | Default | Effect |
 |--------|---------|--------|
-| `removeDataBindings` | `true` | Strip every temples trace from the output: all `data-*` control attributes, and every used component rendered to plain static markup. |
+| `removeDataBindings` | `true` | Unwrap every rendered component to its children, so no custom tag remains in the output. The engine always consumes the `data-*` control attributes during the render. |
 | `templesComponents` | `[]` | `TemplesComponent` classes used by the source (see below). |
 | `rehydrate` | `false` | Reserved: include the component library so custom elements mount and activate in the browser. |
 
@@ -79,10 +92,10 @@ from the markup resolves from the render data, and an explicit attribute on the 
 
 `prepare` accepts a full HTML document (doctype, `<html>`, `<head>`, `<body>`) and returns the
 complete document — this site is built exactly this way. The source must have a single root
-element; multi-root sources throw.
+element. Multi-root sources throw.
 
 ```javascript
-const renderPage = await prepare(layoutHtml);
+const renderPage = prepare(layoutHtml);
 
 const html = await renderPage({
     site: { pages: [{ title: "Home", url: "index.html" }] },
@@ -100,8 +113,8 @@ output, and the global store seeds attributes the markup does not set:
 import { prepare } from "@temples/ssr";
 import { ArticleCard } from "./article-card.js";
 
-const render = await prepare("<article-card></article-card>", {
-    templesComponents: [ArticleCard],
+const render = prepare("<article-card></article-card>", {
+    templesComponents: [ArticleCard]
 });
 
 const html = await render({ title: "Store title" });
@@ -115,5 +128,8 @@ are unwrapped to their children, and with the default options the output contain
 
 ## Runtime requirements
 
-`@temples/ssr` runs on Bun, Node.js (18+), and Deno. It installs the linkedom globals only for
-the duration of each render and restores the previous values afterwards.
+`@temples/ssr` is developed and tested on Bun, the runtime of this repository. The shipped
+build also targets Node (`dist/ssr.js`), but Node.js and Deno are untested.
+
+Each render call installs the linkedom globals only for its duration and restores the previous
+values afterwards.

@@ -78,17 +78,16 @@ re-renders one binding, not the page.
 
 ## Serialize to HTML
 
-`toHtml()` (or its synonym `renderToString()`) returns the rendered HTML as a string. On the
-server, pair the engine with `@temples/ssr`:
+On the server, pair the engine with `@temples/ssr`: `prepare(source)` returns an async render
+function whose result is the rendered HTML string.
 
 ```javascript
-import "@temples/ssr";
-import { Renderer } from "@temples/engine";
+import { prepare } from "@temples/ssr";
 
-const renderer = new Renderer("<h1 data-bind='article.title'>Title</h1>");
-renderer.render({ article: { title: "The Great Race" } });
+const render = prepare("<h1 data-bind='article.title'>Title</h1>");
 
-console.log(renderer.renderToString()); // <h1>The Great Race</h1>
+const html = await render({ article: { title: "The Great Race" } });
+console.log(html); // <h1>The Great Race</h1>
 ```
 
 See [SSR and static site generation](ssr.html) for `prepare()`, full-page rendering, and
