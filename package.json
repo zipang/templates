@@ -18,6 +18,7 @@
 		"build:components": "cd packages/components && bun run build",
 		"build:ssr": "cd packages/ssr && bun run build",
 		"build:jquery": "cd packages/jquery && bun run build",
+		"build:report": "bun scripts/report.ts",
 		"build:docs": "cd packages/docs && bun run build",
 		"serve:docs": "cd packages/docs && bun run serve",
 		"publish:all": "cd packages/engine && bun publish && cd ../components && bun publish && cd ../ssr && bun publish && cd ../jquery && bun publish",

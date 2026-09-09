@@ -115,6 +115,7 @@ Formatting rules are declared in [`.editorconfig`](.editorconfig) (minimal, edit
 | `bun run format` | Format all files in place (writes changes) |
 | `bun run lint` | Run linter only |
 | `bun run typecheck` | TypeScript type checking (`tsc --noEmit`) |
+| `bun run build:report` | Print the size report of the built assets (raw and gzip); `--summary` for a per-package table |
 
 **Before declaring any task complete, run `bun run check` and `bun run typecheck`. Both must pass with zero errors.**
 **Write conformant code from the start** — do not defer to code review.

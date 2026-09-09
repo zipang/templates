@@ -19,6 +19,19 @@ standard, DOM-based engine.
 | [`@temples/ssr`](packages/ssr) | Server-side rendering and static site generation, wired to linkedom. |
 | [`@temples/jquery`](packages/jquery) | The `$.fn.temples(data)` jQuery plugin (jQuery is a peer dependency). |
 
+## Library size
+
+The packages ship plain ES modules. The minified builds have the following sizes:
+
+| Package | Minified | Gzip |
+|---------|----------|------|
+| `@temples/engine` | 6.3 kB | 2.6 kB |
+| `@temples/components` | 5.3 kB | 2.2 kB |
+| `@temples/ssr` | 1.7 kB | 926 B |
+| `@temples/jquery` | 430 B | 298 B |
+
+Run `bun run build` and then `bun run build:report --summary` to regenerate this table.
+
 ## Documentation
 
 The documentation site is built in [`packages/docs`](packages/docs) — with temples itself. It
@@ -33,7 +46,8 @@ bun test               # run every package's tests
 bun run check          # Biome format + lint
 bun run typecheck      # tsc --noEmit
 bun run build          # build all packages (engine first)
-bun run dev            # serve the example app
+bun run build:report   # print the size of every built asset (raw and gzip)
+bun run demo           # serve the example app
 bun run build:docs     # build the documentation site
 ```
 
