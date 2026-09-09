@@ -33,10 +33,13 @@ content/*.md  ──raw copy─────────────▶  www/<slu
 
 ## Commands
 
+Run these commands from inside `packages/docs/`. The build regenerates `www/` completely,
+so never edit its files by hand.
+
 ```sh
-bun run build:docs    # build the site into www/
-bun run serve:docs    # serve www/ at http://localhost:4173
-bun test              # the build has a smoke test (build.test.ts)
+bun run build    # build the site into www/
+bun run serve    # serve www/ at http://localhost:4173
+bun test         # the build has a smoke test (build.test.ts)
 ```
 
 ## Deployment

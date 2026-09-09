@@ -1,121 +1,116 @@
 # AGENTS.md
 
-## Read the README
+## Read the README first
 
-Each root directory contains a `README.md` that explains its content and is an easy-to-read way to discover the project's structure for humans and AI coding agents alike. The `README.md` also contains the conventions used inside this directory. For technical automated workflows a separate `AGENTS.md` can be found aside (not mandatory).
-Always read the `README.md` first before making any change inside the directory.
-If architectural decisions change the way things are done, always ensure that the `README.md` contains the latest content and conventions.
+Most directories contain a `README.md`. It describes the content of the directory and the
+conventions that apply inside it. Read it before you change anything in that directory.
+Some directories have no README. In that case, work from the root `README.md` and this file.
+If a change alters how a directory works, update its README in the same change.
+A directory can also carry an `AGENTS.md` with rules for automated agent workflows. It is optional.
 
 ## Agent Skills
 
-This project uses a set of agent skills that encode the engineering workflow. They live in `.agents/skills/` and are loaded on demand. This file documents how they are discovered, how to pick the right one, and the operating behaviors that apply to all of them.
-Skills are workflows, not suggestions — follow the steps in order and don't skip their verification steps. Multiple skills can apply to a single task (e.g. `spec-driven-development` → `planning-and-task-breakdown` → `incremental-implementation` → `test-driven-development` → `follow-the-rules`).
+This project encodes the engineering workflow in agent skills. They live in `.agents/skills/`,
+and agents load them on demand. Skills are workflows, not suggestions: follow the steps in
+order, and do not skip their verification steps.
 
-### Skill Discovery
+One task can use several skills, one after the other. Example:
+`spec-driven-development` → `planning-and-task-breakdown` → `incremental-implementation` →
+`test-driven-development` → `follow-the-rules`.
 
-When a task arrives, identify the phase and apply the corresponding skill:
+### Skill routing
 
-```
-Task arrives
-    │
-    ├── Don't know what you want yet? ──────→ interview-me
-    ├── Have a rough concept? ─────────────→ idea-refine
-    ├── New project/feature/change? ────────→ spec-driven-development
-    ├── Have a spec, need tasks? ───────────→ planning-and-task-breakdown
-    ├── Implementing code? ────────────────→ incremental-implementation
-    │   ├── API/module-boundary work? ─────→ api-and-interface-design
-    │   ├── Need better context? ──────────→ context-engineering
-    │   ├── Need doc-verified code? ───────→ source-driven-development
-    │   ├── Stakes high / unfamiliar code? → doubt-driven-development
-    │   ├── Writing TypeScript? ───────────→ typescript-best-practices
-    │   └── JS/TS tooling? ────────────────→ use-bun
-    ├── Writing/running tests? ─────────────→ test-driven-development
-    │   └── Testing/debugging real web app pages? → agent-browser
-    ├── Reviewing code? ───────────────────────→ follow-the-rules
-    │   ├── Lazy typing? ──────────────────→ typescript-best-practices
-    │   └── Too complex? ──────────────────→ code-simplification
-    ├── Writing docs, instructions or comments? → technical-writing
-```
+When a task arrives, identify its phase and load the matching skills:
 
-**When in doubt, start with a spec.** If a task is non-trivial and has no spec, begin with `spec-driven-development`.
-Not every task needs every step. A bug fix might only need: `test-driven-development` → `follow-the-rules`.
+| Phase | Skill | Use when |
+|-------|-------|----------|
+| Define | `interview-me` | The goal is unclear, and no plan, spec, or code exists |
+| Define | `idea-refine` | A rough concept needs stress-testing or expansion |
+| Define | `spec-driven-development` | A new project, feature, or change has no spec |
+| Plan | `planning-and-task-breakdown` | A spec exists and needs small, verifiable tasks |
+| Build | `incremental-implementation` | You start implementation work; deliver thin vertical slices |
+| Build | `api-and-interface-design` | The work touches module boundaries or public interfaces |
+| Build | `source-driven-development` | The work must follow official documentation |
+| Build | `doubt-driven-development` | Stakes are high, or the code is unfamiliar |
+| Build | `context-engineering` | Agent output quality degrades, or context needs setup |
+| Build | `typescript-best-practices` | You write or modify TypeScript |
+| Tooling | `use-bun` | Any JS/TS task: use Bun, not Node.js tooling |
+| Verify | `test-driven-development` | You implement logic, fix a bug, or change behavior |
+| Verify | `agent-browser` | You test or debug real web pages and components |
+| Review | `follow-the-rules` | You review code against the project quality rules |
+| Review | `code-simplification` | Code works, but its complexity grows |
+| Write | `technical-writing` | You write or review technical prose |
 
-### Operating Behaviors
+When in doubt, start with a spec: use `spec-driven-development`.
+Not every task needs every skill. A bug fix may only need `test-driven-development` → `follow-the-rules`.
 
-These behaviors apply at all times, across all skills. They are non-negotiable. The right column lists the failure mode each behavior avoids.
+### Operating behaviors
 
-| Do | Don't |
-|----|-------|
-| Surface assumptions before non-trivial work and give the human a chance to correct them. | Fill ambiguous requirements silently, or build without a spec because "it's obvious". |
+These behaviors apply at all times, across all skills. They are non-negotiable.
+The right column lists the failure mode that each behavior avoids.
+
+| Do | Do not |
+|----|--------|
+| Surface assumptions before non-trivial work and give the human a chance to correct them. | Fill ambiguous requirements silently, or build without a spec because "it is obvious". |
 | Manage confusion actively. STOP, name the confusion, present the tradeoff, wait for resolution. | Plow ahead when lost, or hide inconsistencies you notice. |
-| Push back when warranted, with concrete downsides and alternatives. | Be a yes-machine, or hide tradeoffs on non-obvious decisions. |
+| Object when warranted, with concrete downsides and alternatives. | Be a yes-machine, or hide tradeoffs on non-obvious decisions. |
 | Enforce simplicity. Prefer the boring, obvious solution. | Overcomplicate code and APIs. |
-| Maintain scope discipline. Touch only what you are asked to touch. | Modify code or comments unrelated to the task, or remove things you don't fully understand. |
-| Verify, don't assume. A task is done only when evidence passes. | Skip verification because "it looks right". |
+| Maintain scope discipline. Touch only what you are asked to touch. | Modify code or comments unrelated to the task, or remove things you do not fully understand. |
+| Verify, do not assume. A task is done only when evidence passes. | Skip verification because "it looks right". |
 
-### Quick Reference
+## Boundaries
 
-| Phase | Skill | One-Line Summary |
-|-------|-------|------------------|
-| Define | `interview-me` | Extract what the user actually wants before any plan, spec, or code exists |
-| Define | `idea-refine` | Refine raw ideas through structured divergent and convergent thinking |
-| Define | `spec-driven-development` | Requirements and acceptance criteria before code |
-| Plan | `planning-and-task-breakdown` | Decompose work into small, verifiable tasks |
-| Build | `incremental-implementation` | Thin vertical slices, test each before expanding |
-| Build | `api-and-interface-design` | Stable interfaces with clear contracts |
-| Build | `source-driven-development` | Verify against official docs before implementing |
-| Build | `doubt-driven-development` | Adversarial fresh-context review of non-trivial decisions |
-| Build | `context-engineering` | Right context at the right time |
-| Build | `typescript-best-practices` | Strict, honest TypeScript types — no lazy `unknown`/`any`/casts |
-| Tooling | `use-bun` | Use Bun instead of Node.js tooling |
-| Verify | `test-driven-development` | Failing test first, then make it pass |
-| Verify | `agent-browser` | Test/debug real web pages & components in a browser |
-| Review | `follow-the-rules` | Conformance review against the project's quality rules |
-| Review | `code-simplification` | Preserve behavior while reducing unnecessary complexity |
-| Write | `technical-writing` | Technical prose in Simplified Technical English (STE) |
+- Never commit secrets, keys, or `.env` files.
+- Never edit generated output by hand: `packages/*/dist/` and `packages/docs/www/`. Rebuild it instead.
+- Do not add a dependency without checking its effect on the bundle size (`bun run build:report`).
 
-## Technical Writing
+## Technical writing
 
-All technical prose in this project is written with the `technical-writing` skill, which enforces Simplified Technical English (STE).
-It applies to **every** written artifact, not just documentation:
+All technical prose follows the `technical-writing` skill (Simplified Technical English).
+It applies to README files, AGENTS files, skill instructions, JSDoc and code comments,
+pull-request descriptions, commit messages, and error messages.
+Text inside code (identifiers, shell commands, markup) stays verbatim.
 
-- `README.md` files
-- `AGENTS.md` files and agent skill instructions
-- JSDoc and code comments
-- Pull-request descriptions and commit messages
-- Error messages
+## Browser testing
 
-The same discipline applies whether you write new text or review existing text.
-Text inside code (identifiers, shell commands, markup) stays verbatim — STE applies to the sentences around them, not to the tokens.
+Use the `agent-browser` skill to test and debug real web pages and web components.
+Its `SKILL.md` is a discovery stub. Run `agent-browser skills get core` to load the full workflow.
 
-## Browser Testing
+## Bun tooling
 
-The `agent-browser` skill (`agent-browser` CLI in `.agents/skills/agent-browser/`) is used for testing and debugging real web pages — especially our web components. It automates Chrome/Chromium via CDP with accessibility-tree snapshots. Install with `bun add -g agent-browser && agent-browser install`, then load the up-to-date workflow via `agent-browser skills get core` (the SKILL.md is a discovery stub).
+Default to Bun, not Node.js. The `use-bun` skill holds the authoritative guidance
+(script usage, APIs, testing, and frontend HTML imports). Load it for every JS/TS task.
 
-## Bun Tooling
-
-The authoritative Bun guidance (script usage, APIs, testing, and frontend HTML imports) lives in the `use-bun` skill in `.agents/skills/use-bun/`. Default to Bun instead of Node.js — that skill is a superset of this project's tooling rules and is loaded whenever JS/TS tasks arise.
-
-## Code Style: linting, formating
+## Code style: linting and formatting
 
 This project uses [Biome](https://biomejs.dev/) for formatting and linting.
-Formatting rules are declared in [`.editorconfig`](.editorconfig) (minimal, editor-agnostic) and enforced by [`biome.jsonc`](biome.jsonc).
+[`.editorconfig`](.editorconfig) declares the formatting rules (minimal, editor-agnostic).
+[`biome.jsonc`](biome.jsonc) enforces them.
 
-### Additional style requirements (check these in any code review)
+### Style requirements
+
+Check these rules in every code review:
 
 - Declare a JSDoc block for every function.
-- Prefer arrow function definitions: `const fn = () => {}`. Do not use the `function` keyword.
-- _Always_ leave a blank line before a test statement or a loop statement. This helps identify the branching points.
+- Define functions as arrow functions: `const fn = () => {}`. Do not use the `function` keyword.
+- Always leave a blank line before a test statement or a loop statement. This shows the branching points.
 
 ### Commands
 
+All commands in this table run from the repository root:
+
 | Command | Description |
 |---------|-------------|
+| `bun test` | Run the test suite of every package |
 | `bun run check` | Run formatter + linter (reports violations, no changes) |
 | `bun run format` | Format all files in place (writes changes) |
 | `bun run lint` | Run linter only |
 | `bun run typecheck` | TypeScript type checking (`tsc --noEmit`) |
-| `bun run build:report` | Print the size report of the built assets (raw and gzip); `--summary` for a per-package table |
+| `bun run build:report` | Print the size report of the built assets (raw and gzip). Use `--summary` for a per-package table |
 
-**Before declaring any task complete, run `bun run check` and `bun run typecheck`. Both must pass with zero errors.**
-**Write conformant code from the start** — do not defer to code review.
+### Completion gate
+
+Before you declare any task complete:
+
+- Run `bun run check` and `bun run typecheck`. Both must pass with zero errors.
+- Write conformant code from the start. Do not defer to code review.

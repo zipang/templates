@@ -61,7 +61,7 @@ packages/
   jquery/       @temples/jquery
   docs/         documentation site (private, built with temples)
 example/        shopping-list demo app
-tasks/          spec, plan, and task list
+roadmap/        spec, plan, and task list
 ```
 
 ## License
