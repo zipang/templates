@@ -1,5 +1,5 @@
 ---
-title: temples documentation
+title: @temples packages documentation
 description: Declarative HTML templates rendered by a DOM-based engine, in the browser and on the server.
 order: 0
 ---
@@ -8,7 +8,7 @@ order: 0
 
 `@temples` or `templ(at)es` are templates for HTML that you won't hate.
 
-- Templates are **plain valide HTML markup** where any HTML tag is simply decorated with a few `data-bind` attributes: — your IDE and your designers recognize them instantly.
+- @temples templates are **plain valid HTML markup** where any HTML tag is simply decorated with a few `data-bind` attributes: — your IDE and your designers recognize them instantly.
 - The engine is **DOM-based and purely declarative**, with real-time partial updates of single values.
 - The same templates render **in the browser and on the server** (SSR and static site generation).
 - Components are **Web Components** without a framework: just create a class that inherits from `TemplesComponent`,
