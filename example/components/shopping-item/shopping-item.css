@@ -1,33 +1,6 @@
 shopping-item {
 	display: block;
 
-	li.item {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.5rem 0.75rem;
-		border-bottom: 1px solid #ddd;
-
-		&.checked {
-			.label {
-				text-decoration: line-through;
-				color: #999;
-			}
-		}
-
-		&.editing {
-			button.edit {
-				display: none;
-			}
-
-			.edit-input,
-			button.save {
-				display: block;
-			}
-		}
-
-	}
-
 	.toggle {
 		accent-color: #000;
 	}
@@ -54,6 +27,32 @@ shopping-item {
 		&:hover {
 			background: #000;
 			color: #fff;
+		}
+	}
+
+	li.item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0.75rem;
+		border-bottom: 1px solid #ddd;
+
+		&.checked {
+			.label {
+				text-decoration: line-through;
+				color: #999;
+			}
+		}
+
+		&.editing {
+			button.edit {
+				display: none;
+			}
+
+			.edit-input,
+			button.save {
+				display: block;
+			}
 		}
 	}
 }

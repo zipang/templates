@@ -16,6 +16,19 @@ type ShoppingItemState = ShoppingItemData & {
 	editingStatus(): string;
 };
 
+const INITIAL_STATE: ShoppingItemState = {
+	id: "",
+	label: "",
+	checked: false,
+	editing: false,
+	checkedStatus() {
+		return this.checked ? "checked" : "";
+	},
+	editingStatus() {
+		return this.editing ? "editing" : "";
+	}
+};
+
 /**
  * A single shopping list entry, configured through plain attributes.
  *
@@ -27,18 +40,7 @@ type ShoppingItemState = ShoppingItemData & {
  */
 export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 	constructor() {
-		super({
-			id: "",
-			label: "",
-			checked: false,
-			editing: false,
-			checkedStatus() {
-				return this.checked ? "checked" : "";
-			},
-			editingStatus() {
-				return this.editing ? "editing" : "";
-			}
-		});
+		super(INITIAL_STATE);
 	}
 
 	/**
@@ -72,7 +74,7 @@ export class ShoppingItem extends TemplesComponent<ShoppingItemState> {
 	/**
 	 * Publish a removal request for this item.
 	 */
-	remove(): void {
+	removeItem(): void {
 		this.emit("removed", this.snapshot());
 	}
 
@@ -93,6 +95,6 @@ TemplesComponent.define("shopping-item", ShoppingItem, {
 		"change .toggle": "toggle",
 		"dblclick .label": "edit",
 		"click .save": "save",
-		"click .remove": "remove"
+		"click .remove": "removeItem"
 	}
 });

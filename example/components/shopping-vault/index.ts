@@ -12,6 +12,13 @@ type ShoppingVaultState = {
 	isEmpty(): boolean;
 };
 
+const INITIAL_STATE: ShoppingVaultState = {
+	vaultItems: [],
+	isEmpty() {
+		return this.vaultItems.length === 0;
+	}
+};
+
 /**
  * A holding place for removed items, with a way to bring them back.
  *
@@ -21,23 +28,13 @@ type ShoppingVaultState = {
  */
 export class ShoppingVault extends TemplesComponent<ShoppingVaultState> {
 	constructor() {
-		super({
-			vaultItems: [],
-			isEmpty() {
-				return this.vaultItems.length === 0;
-			}
-		});
+		super(INITIAL_STATE);
 	}
-
-	static override events = {
-		"shopping-item:removed": "onRemoved",
-		"click .recall": "onRecall"
-	};
 
 	/**
 	 * Collect a removed item into the vault.
 	 */
-	onRemoved(evt: CustomEvent): void {
+	collect(evt: CustomEvent): void {
 		if (!isShoppingItemData(evt.detail)) return;
 
 		this.state.vaultItems.push(evt.detail);
@@ -46,7 +43,7 @@ export class ShoppingVault extends TemplesComponent<ShoppingVaultState> {
 	/**
 	 * Remove an item from the vault and publish it for recall.
 	 */
-	onRecall(evt: Event): void {
+	recall(evt: Event): void {
 		const button = (evt.target as Element).closest("button.recall");
 		const id = button?.getAttribute("data-id");
 
@@ -62,5 +59,9 @@ export class ShoppingVault extends TemplesComponent<ShoppingVaultState> {
 }
 
 TemplesComponent.define("shopping-vault", ShoppingVault, {
-	template
+	template,
+	events: {
+		"shopping-item:removed": "collect",
+		"click .recall": "recall"
+	}
 });
