@@ -23,15 +23,15 @@ Structure context from most persistent to most transient:
 
 ```
 ┌─────────────────────────────────────┐
-│  1. Rules Files (CLAUDE.md, etc.)   │ ← Always loaded, project-wide
+│  1. Rules Files (AGENTS.md, etc.)   │ ← Always loaded, project-wide
 ├─────────────────────────────────────┤
 │  2. Spec / Architecture Docs        │ ← Loaded per feature/session
 ├─────────────────────────────────────┤
-│  3. Relevant Source Files            │ ← Loaded per task
+│  3. Relevant Source Files           │ ← Loaded per task
 ├─────────────────────────────────────┤
-│  4. Error Output / Test Results      │ ← Loaded per iteration
+│  4. Error Output / Test Results     │ ← Loaded per iteration
 ├─────────────────────────────────────┤
-│  5. Conversation History             │ ← Accumulates, compacts
+│  5. Conversation History            │ ← Accumulates, compacts
 └─────────────────────────────────────┘
 ```
 
@@ -39,7 +39,7 @@ Structure context from most persistent to most transient:
 
 Create a rules file that persists across sessions. This is the highest-leverage context you can provide.
 
-**CLAUDE.md** (for Claude Code):
+**AGENTS.md**:
 ```markdown
 # Project: [Name]
 
@@ -70,12 +70,6 @@ Create a rules file that persists across sessions. This is the highest-leverage 
 ## Patterns
 [One short example of a well-written component in your style]
 ```
-
-**Equivalent files for other tools:**
-- `.cursorrules` or `.cursor/rules/*.md` (Cursor)
-- `.windsurfrules` (Windsurf)
-- `.github/copilot-instructions.md` (GitHub Copilot)
-- `AGENTS.md` (OpenAI Codex)
 
 ### Level 2: Specs and Architecture
 
