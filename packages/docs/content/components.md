@@ -67,14 +67,14 @@ TemplesComponent.define("flipping-card", FlippingCard, {
 
 | Option | Role |
 |--------|------|
-| `template` | The HTML template string. Parsed once per class; every instance clones it. |
-| `attributes` | The observed attributes map. Each key names an attribute that flows into `state`; each value is its coercion type: `"string"`, `"boolean"`, `"number"`, or `"json"`. |
+| `template` | The HTML template string. Parsed once per class. Every instance clones it. |
+| `attributes` | The observed attributes map. Each key names an attribute that flows into `state`. Each value is its coercion type: `"string"`, `"boolean"`, `"number"`, or `"json"`. |
 | `events` | The event bindings map (see below). |
 | `css` | Optional stylesheet text, injected when the component is used in SSR (see below). |
 | `globalStore` | Optional shared store that seeds the attributes the tag does not set. |
 
 The `attributes` map derives the class `observedAttributes` and `attributeTypes` statics, which
-stay internal. A class that also declares those statics, and passes `attributes`, makes `define()`
+stay internal. A class that passes `attributes` and also declares those statics makes `define()`
 throw.
 
 ## State: attributes are the source of truth

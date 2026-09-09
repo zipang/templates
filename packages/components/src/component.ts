@@ -118,14 +118,6 @@ export interface TemplesComponentClass {
 	globalStore?: TemplesData;
 
 	/**
-	 * Register the class through the class form. The SSR pipeline uses it to
-	 * register a fresh subclass per render window.
-	 *
-	 * @param options - The global data store shared by every component.
-	 */
-	define(options?: { globalStore?: TemplesData }): void;
-
-	/**
 	 * Create a component instance. `never[]` accepts any subclass constructor
 	 * parameter list.
 	 */
@@ -299,28 +291,14 @@ export class TemplesComponent<T extends object = Record<string, unknown>> extend
 	}
 
 	/**
-	 * Register the custom element from the subclass's static fields.
-	 *
-	 * The subclass declares `tag`, `template`, `events`, `css`,
-	 * `observedAttributes`, and `attributeTypes` as static fields. This form
-	 * keeps those fields as the single source of truth and stays available for
-	 * backward compatibility.
-	 *
-	 * @param options - Optional `globalStore` data dictionary shared by every
-	 * component. It seeds observed attributes that are absent on the tag.
-	 */
-	static define(options?: { globalStore?: TemplesData }): void;
-
-	/**
 	 * Register the custom element with an explicit tag, class, and options.
 	 *
-	 * This is the canonical way to declare a component: the options carry the
-	 * template, the `attributes` map, the events, the stylesheet, and the
-	 * global store, while the class carries its `state` and handler methods.
-	 * The `attributes` map derives the class `observedAttributes` and
-	 * `attributeTypes` statics so the platform observes the declared names.
-	 * The options are copied onto the class's static fields so server-side
-	 * rendering can read them.
+	 * The options carry the template, the `attributes` map, the events, the
+	 * stylesheet, and the global store, while the class carries its `state` and
+	 * handler methods. `define()` parses the template once, derives the class
+	 * `observedAttributes` and `attributeTypes` statics from the `attributes`
+	 * map so the platform observes the declared names, and copies the options
+	 * onto the class's static fields so server-side rendering can read them.
 	 *
 	 * @param tagName - The custom element tag name (must contain a hyphen).
 	 * @param componentClass - The class extending `TemplesComponent`.
@@ -331,48 +309,35 @@ export class TemplesComponent<T extends object = Record<string, unknown>> extend
 		tagName: string,
 		componentClass: TemplesComponentClass,
 		options: DefineOptions
-	): void;
-
-	static define(
-		tagNameOrOptions?: string | { globalStore?: TemplesData },
-		componentClass?: TemplesComponentClass,
-		options?: DefineOptions
 	): void {
-		// biome-ignore lint/complexity/noThisInStatic: `this` is the subclass constructor in the backward-compatible form.
-		const self = this as unknown as TemplesComponentClass;
+		componentClass.tag = tagName;
+		componentClass.template = options.template;
 
-		const ctor: TemplesComponentClass =
-			typeof tagNameOrOptions === "string" ? (componentClass as TemplesComponentClass) : self;
-
-		if (typeof tagNameOrOptions === "string") {
-			ctor.tag = tagNameOrOptions;
-			ctor.template = options?.template ?? "";
-
-			if (options?.attributes !== undefined) {
-				TemplesComponent.assertNoStaticAttributes(tagNameOrOptions, ctor);
-				ctor.attributeTypes = options.attributes;
-				ctor.observedAttributes = Object.keys(options.attributes);
-			}
-
-			if (options?.events !== undefined) {
-				ctor.events = options.events;
-			}
-
-			ctor.css = options?.css ?? "";
-
-			if (options?.globalStore !== undefined) {
-				TemplesComponent.globalStore = options.globalStore;
-			}
-		} else if (tagNameOrOptions?.globalStore !== undefined) {
-			TemplesComponent.globalStore = tagNameOrOptions.globalStore;
+		if (options.attributes !== undefined) {
+			TemplesComponent.assertNoStaticAttributes(tagName, componentClass);
+			componentClass.attributeTypes = options.attributes;
+			componentClass.observedAttributes = Object.keys(options.attributes);
 		}
 
-		TemplesComponent.resolveTemplate(ctor);
-		TemplesComponent.registerEventTypes(ctor);
+		if (options.events !== undefined) {
+			componentClass.events = options.events;
+		}
+
+		componentClass.css = options.css ?? "";
+
+		if (options.globalStore !== undefined) {
+			TemplesComponent.globalStore = options.globalStore;
+		}
+
+		TemplesComponent.resolveTemplate(componentClass);
+		TemplesComponent.registerEventTypes(componentClass);
 
 		// The platform calls a custom element constructor with no arguments;
 		// the `never[]` boundary signature accepts every subclass constructor.
-		customElements.define(ctor.tag, ctor as unknown as CustomElementConstructor);
+		customElements.define(
+			componentClass.tag,
+			componentClass as unknown as CustomElementConstructor
+		);
 	}
 
 	/**
@@ -617,13 +582,13 @@ export class TemplesComponent<T extends object = Record<string, unknown>> extend
 	 * an emitter writes a short local name and classes never collide. Subscribers
 	 * elsewhere register `"<tag>:<name>"` in their `events` map.
 	 *
-	 * @param name - The local message name, prefixed with the emitting tag.
+	 * @param eventName - The local message name, prefixed with the emitting tag.
 	 * @param detail - Optional payload delivered on the message's `detail`.
 	 */
-	emit(name: string, detail?: unknown): void {
+	emit(eventName: string, detail?: unknown): void {
 		const ctor = this.constructor as typeof TemplesComponent;
 
-		dispatchMessage(`${ctor.tag}:${name}`, detail);
+		dispatchMessage(`${ctor.tag}:${eventName}`, detail);
 	}
 
 	/**

@@ -1,4 +1,4 @@
-import type { TemplesComponentClass } from "@temples/components";
+import type { TemplesComponent, TemplesComponentClass } from "@temples/components";
 import type { TemplesData } from "@temples/engine";
 import { parseHTML } from "linkedom";
 import { extractDomGlobals, installGlobals, restoreGlobals } from "./utilities/dom-globals";
@@ -90,7 +90,7 @@ export const prepare: PrepareFunction = (
 		try {
 			const { Renderer, stripPlaceholders } = await import("@temples/engine");
 
-			let componentClass: TemplesComponentClass | undefined;
+			let componentClass: typeof TemplesComponent | undefined;
 
 			if (templesComponents.length > 0) {
 				({ TemplesComponent: componentClass } = await import("@temples/components"));
@@ -102,7 +102,10 @@ export const prepare: PrepareFunction = (
 					// inherits the declaration and the custom element upgrades.
 					const renderClass = class extends tc {};
 
-					renderClass.define({ globalStore: data });
+					componentClass.define(renderClass.tag, renderClass, {
+						template: renderClass.template,
+						globalStore: data
+					});
 				}
 			}
 

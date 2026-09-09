@@ -52,7 +52,7 @@ TemplesComponent.define("flipping-card", FlippingCard, {
   by its declared type (`"string" | "boolean" | "number" | "json"`).
 - `this.state` is a deep reactive proxy: any mutation triggers a re-render of the component's
   bindings.
-- Attributes on the tag are the single source of truth; the optional `globalStore` option seeds
+- Attributes on the tag are the single source of truth. The optional `globalStore` option seeds
   attributes that the tag does not set.
 - In TypeScript, the class declares its complete state shape with the `TemplesComponent<T>`
   parameter. The compiler types every `state` access, and the initial `super({ ... })` literal is

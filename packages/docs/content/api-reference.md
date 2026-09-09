@@ -117,7 +117,6 @@ interface TemplesComponentClass {
     observedAttributes: string[];
     attributeTypes: Record<string, AttributeType>;
     globalStore?: TemplesData;
-    define(options?: { globalStore?: TemplesData }): void;
     new (...args: never[]): HTMLElement;
 }
 ```
