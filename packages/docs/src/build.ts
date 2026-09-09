@@ -167,8 +167,21 @@ export const buildSite = async (): Promise<PageMeta[]> => {
 	);
 
 	for (const source of sources) {
+		/**
+		 * The nav data of this page: every visible page, plus a helper that
+		 * derives the `current` state class from the rendered page slug.
+		 */
+		const nav = metas.map((meta) => ({
+			title: meta.title,
+			url: meta.url,
+			/**
+			 * The state class of the item: `current` when it matches the page.
+			 */
+			status: (): string => (meta.slug === source.slug ? "current" : "")
+		}));
+
 		const html = await renderLayout({
-			site: { pages: metas },
+			site: { pages: nav },
 			page: {
 				title: source.title,
 				description: source.description,
