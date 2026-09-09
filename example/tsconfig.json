@@ -1,13 +1,10 @@
 {
-	"compilerOptions": {
-		// Resolve the workspace package sources at runtime and for the editor,
-		// so the example runs with `bun run dev` without a prior build.
-		"paths": {
-			"@temples/components": ["../packages/components/src/component.ts"],
-			"@temples/components/reactive": ["../packages/components/src/reactive.ts"],
-			"@temples/engine": ["../packages/engine/src/engine.ts"],
-			"@temples/ssr": ["../packages/ssr/src/ssr.ts"],
-			"@temples/jquery": ["../packages/jquery/src/jquery.ts"]
-		}
-	}
+	// Inherit the root compiler options, including the workspace `paths` that
+	// resolve `@temples/*` to their package sources for the editor and the
+	// Bun dev flow. Bun follows the `extends` chain the same way.
+	"extends": "../tsconfig.json",
+	// Add the ambient declarations for Bun's asset imports (`*.html` as text,
+	// `*.css` for their side effect). The default include already covers this
+	// directory only, so the root declarations file is listed explicitly.
+	"files": ["../types.d.ts"]
 }
