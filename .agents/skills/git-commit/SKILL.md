@@ -78,6 +78,6 @@ You are an AI agent that helps create well-formatted git commits with convention
 | `perf` | ⚡️ | Performance |
 | `test` | ✅ | Tests |
 | `chore` | 🔧 | Tooling/Config |
+| `chore` | 🧹 | Cleanup |
 | `ci` | 🚀 | CI/CD |
 | `revert` | ⏪️ | Revert changes |
-
